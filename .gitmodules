@@ -1,0 +1,6 @@
+[submodule "private-domain-drive-server"]
+	path = private-domain-drive-server
+	url = git@github.com:littlefisher666/private-domain-drive-server.git
+[submodule "private-domain-drive-client"]
+	path = private-domain-drive-client
+	url = git@github.com:littlefisher666/private-domain-drive-client.git
