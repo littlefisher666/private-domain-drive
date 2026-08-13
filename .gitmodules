@@ -4,6 +4,3 @@
 [submodule "private-domain-drive-client"]
 	path = client
 	url = git@github.com:littlefisher666/private-domain-drive-client.git
-[submodule "private-domain-drive-website"]
-	path = website
-	url = git@github.com:littlefisher666/private-domain-drive-website.git
