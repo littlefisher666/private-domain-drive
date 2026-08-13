@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>文件浏览 · 私域网盘</title>
+  <link rel="stylesheet" href="./css/prototype.css" />
+</head>
+<body>
+  <div class="device-page">
+    <div>
+      <div class="device-toolbar">
+        <div class="left"><a class="btn btn-secondary" href="./index.html">返回目录</a></div>
+        <div class="right">
+          <label class="label" for="role-switch">角色</label>
+          <select id="role-switch" class="field role-select">
+            <option value="admin">管理员</option>
+            <option value="member">普通成员</option>
+          </select>
+        </div>
+      </div>
+      <div class="phone-shell">
+        <div class="phone-screen android">
+          <div class="status-bar"><span>09:41</span><span>5G ▮▮▮</span></div>
+          <div class="app-header">
+            <div class="header-left">
+              <button class="icon-btn hidden" id="btn-go-up" aria-label="返回上级">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+              </button>
+              <div>
+                <h1 id="files-title">共享空间</h1>
+                <p class="subtitle">当前身份 <span class="chip admin" data-role-label>管理员</span></p>
+              </div>
+            </div>
+            <button class="icon-btn" id="btn-refresh" aria-label="刷新">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4V1L7 6l5 5V7c2.76 0 5 2.24 5 5a5 5 0 0 1-8.9 3h-2.1A7 7 0 1 0 17.65 6.35z"/></svg>
+            </button>
+          </div>
+          <div class="path-bar">
+            <span class="path-chip" id="current-path-label">shared</span>
+          </div>
+          <div class="view-toolbar">
+            <div class="view-mode-toggle" role="group" aria-label="浏览方式">
+              <button type="button" class="view-mode-btn active" data-view-mode="list">列表</button>
+              <button type="button" class="view-mode-btn" data-view-mode="grid">缩略图</button>
+            </div>
+            <span class="view-mode-hint" id="view-mode-hint">列表：展示名称、类型、大小与更新时间</span>
+          </div>
+          <div class="app-content">
+            <div class="permission-note">
+              <span>支持列表/缩略图切换；缩略图仅图片显示预览，其他类型用默认图标。点右侧菜单可重命名、删除、下载。</span>
+            </div>
+            <div class="permission-note" data-role-member>
+              <span>普通成员可浏览和下载，上传与删除已隐藏</span>
+            </div>
+            <div id="file-list" class="file-list"></div>
+            <div id="empty-panel" class="empty-state hidden">
+              <div class="emoji"></div>
+              <h3>文件夹是空的</h3>
+              <p>可以新建文件夹，或上传照片/文档。</p>
+              <button class="btn btn-primary" data-role-admin data-show="#upload-sheet">上传或新建</button>
+            </div>
+          </div>
+          <button class="fab" data-role-admin data-show="#upload-sheet" aria-label="上传"></button>
+
+          <div class="bottom-nav">
+            <a class="nav-item active" data-nav="files" href="./mobile-files.html"><span class="nav-ico"></span><span>文件</span></a>
+            <a class="nav-item" data-nav="tasks" href="./mobile-tasks.html"><span class="nav-ico"></span><span>传输</span></a>
+            <a class="nav-item" data-nav="me" href="./mobile-states.html"><span class="nav-ico"></span><span>我的</span></a>
+          </div>
+
+          <div id="upload-sheet" class="sheet-overlay hidden">
+            <div class="sheet">
+              <div class="sheet-handle"></div>
+              <button class="sheet-action" id="btn-upload-file" type="button"><span class="ico upload"></span><span>上传文件</span></button>
+              <button class="sheet-action" id="btn-upload-album" type="button"><span class="ico image"></span><span>从相册上传</span></button>
+              <a class="sheet-action" href="./mobile-share.html"><span class="ico image"></span><span>模拟系统分享导入</span></a>
+              <button class="sheet-action" id="btn-create-folder" type="button"><span class="ico folder"></span><span>新建文件夹</span></button>
+              <button class="btn btn-secondary btn-block mt-8" data-hide="#upload-sheet">取消</button>
+            </div>
+          </div>
+
+          <div id="item-sheet" class="sheet-overlay hidden">
+            <div class="sheet">
+              <div class="sheet-handle"></div>
+              <div class="sheet-title" id="item-sheet-title">操作</div>
+              <button class="sheet-action" data-item-action="open" type="button"><span class="ico folder"></span><span>打开</span></button>
+              <button class="sheet-action" data-item-action="preview" type="button"><span class="ico image"></span><span>预览</span></button>
+              <button class="sheet-action" data-item-action="download" type="button"><span class="ico upload"></span><span>下载</span></button>
+              <button class="sheet-action" data-item-action="rename" data-role-admin type="button"><span class="ico folder"></span><span>重命名</span></button>
+              <button class="sheet-action text-danger" data-item-action="delete" data-role-admin type="button"><span class="ico folder"></span><span>删除</span></button>
+              <button class="btn btn-secondary btn-block mt-8" data-hide="#item-sheet">取消</button>
+            </div>
+          </div>
+
+          <div id="delete-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+              <h3>删除此项？</h3>
+              <p id="delete-desc">删除后将从共享空间移除。一期没有回收站。</p>
+              <div class="modal-actions">
+                <button class="btn btn-secondary" data-hide="#delete-modal">取消</button>
+                <button class="btn btn-danger" id="btn-confirm-delete">删除</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="mkdir-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+              <h3>新建文件夹</h3>
+              <p>在当前目录下创建新文件夹。</p>
+              <label class="field-group mt-12">
+                <span class="field-label">文件夹名称</span>
+                <input id="mkdir-input" class="field" type="text" value="新建文件夹" maxlength="64" autocomplete="off" />
+              </label>
+              <p class="alert danger hidden mt-12" id="mkdir-error"></p>
+              <div class="modal-actions">
+                <button class="btn btn-secondary" type="button" data-hide="#mkdir-modal">取消</button>
+                <button class="btn btn-primary" type="button" id="btn-confirm-mkdir">创建</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./js/prototype.js"></script>
+</body>
+</html>

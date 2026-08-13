@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>空目录 · 私域网盘</title>
+  <link rel="stylesheet" href="./css/prototype.css" />
+</head>
+<body>
+  <div class="device-page">
+    <div>
+      <div class="device-toolbar">
+        <div class="left"><a class="btn btn-secondary" href="./index.html">返回目录</a></div>
+        <div class="right"><span class="label">Android · 空状态入口</span></div>
+      </div>
+      <div class="phone-shell">
+        <div class="phone-screen android">
+          <div class="status-bar"><span>09:41</span><span>5G ▮▮▮</span></div>
+          <div class="login-wrap">
+            <div class="brand">
+              <div class="brand-badge">PD</div>
+              <h1>空目录演示</h1>
+              <p>将进入 shared/uploads，可在文件页新建/上传后观察列表变化。</p>
+            </div>
+            <button class="btn btn-primary btn-block" id="go-empty">打开 uploads 空目录</button>
+            <a class="btn btn-secondary btn-block mt-12" href="./mobile-files.html">直接去文件页</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./js/prototype.js"></script>
+  <script>
+    document.getElementById('go-empty').addEventListener('click', () => {
+      if (!AppStore.get().session.loggedIn) {
+        AppStore.login('family.admin', 'admin123');
+      }
+      AppStore.ensureDir('shared/uploads/');
+      AppStore.setPath('shared/uploads/');
+      location.href = './mobile-files.html';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>系统分享上传 · 私域网盘</title>
+  <link rel="stylesheet" href="./css/prototype.css" />
+</head>
+<body>
+  <div class="device-page">
+    <div>
+      <div class="device-toolbar">
+        <div class="left"><a class="btn btn-secondary" href="./index.html">返回目录</a></div>
+        <div class="right">
+          <label class="label" for="role-switch">角色</label>
+          <select id="role-switch" class="field role-select">
+            <option value="admin">管理员</option>
+            <option value="member">普通成员</option>
+          </select>
+        </div>
+      </div>
+      <div class="phone-shell">
+        <div class="phone-screen android">
+          <div class="status-bar"><span>09:41</span><span>5G ▮▮▮</span></div>
+          <div class="app-header">
+            <div>
+              <h1>确认上传</h1>
+              <p class="subtitle" id="share-subtitle">来自系统相册分享</p>
+            </div>
+            <a class="icon-btn" href="./mobile-files.html" aria-label="关闭"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></a>
+          </div>
+
+          <div class="app-content stack">
+            <div class="alert info">分享进入后先选目录，再确认上传。确认后会写入文件列表和传输任务。</div>
+
+            <div class="progress-card">
+              <strong class="section-title">目标文件夹</strong>
+              <div class="share-target">
+                <div>
+                  <strong id="target-path">shared / photos</strong>
+                  <span class="small muted">可切换到任意有权限的目录</span>
+                </div>
+                <button class="btn btn-secondary" data-show="#folder-sheet">更改</button>
+              </div>
+            </div>
+
+            <div class="progress-card">
+              <div class="progress-head"><strong>待上传列表</strong><span id="share-count">0 项</span></div>
+              <div class="share-file-list" id="share-list"></div>
+            </div>
+
+            <div class="permission-note" data-role-member>
+              <span>普通成员无上传权限时，确认会被拦截。</span>
+            </div>
+
+            <div class="share-actions">
+              <a class="btn btn-secondary" href="./mobile-files.html">取消</a>
+              <button class="btn btn-primary" id="confirm-upload" data-role-admin>确认上传</button>
+              <button class="btn btn-primary" id="confirm-upload-member" data-role-member>确认上传</button>
+            </div>
+          </div>
+
+          <div id="folder-sheet" class="sheet-overlay hidden">
+            <div class="sheet">
+              <div class="sheet-handle"></div>
+              <div class="sheet-title">选择上传目录</div>
+              <button class="sheet-action folder-option" data-path-value="shared/photos/" type="button"><span class="ico folder"></span><span>shared / photos</span></button>
+              <button class="sheet-action folder-option" data-path-value="shared/uploads/" type="button"><span class="ico folder"></span><span>shared / uploads</span></button>
+              <button class="sheet-action folder-option" data-path-value="shared/docs/" type="button"><span class="ico folder"></span><span>shared / docs</span></button>
+              <button class="sheet-action folder-option" data-path-value="shared/common/" type="button"><span class="ico folder"></span><span>shared / common</span></button>
+              <button class="btn btn-secondary btn-block mt-8" data-hide="#folder-sheet">取消</button>
+            </div>
+          </div>
+
+          <div id="permission-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+              <h3>无法上传</h3>
+              <p>当前身份没有上传权限。请联系管理员，或切换到有权限的账号。</p>
+              <div class="modal-actions">
+                <button class="btn btn-primary btn-block" data-hide="#permission-modal">知道了</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./js/prototype.js"></script>
+</body>
+</html>

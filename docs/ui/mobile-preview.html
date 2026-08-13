@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>文件预览 · 私域网盘</title>
+  <link rel="stylesheet" href="./css/prototype.css" />
+</head>
+<body>
+  <div class="device-page">
+    <div>
+      <div class="device-toolbar">
+        <div class="left"><a class="btn btn-secondary" href="./index.html">返回目录</a></div>
+        <div class="right"><span class="label">Android · 预览闭环</span></div>
+      </div>
+      <div class="phone-shell">
+        <div class="phone-screen android">
+          <div class="status-bar dark"><span>09:41</span><span>5G ▮▮▮</span></div>
+          <div class="app-header preview-topbar">
+            <div>
+              <h1 id="preview-title">家庭合影.jpg</h1>
+              <p class="subtitle" id="preview-path">shared</p>
+            </div>
+            <div class="inline-actions">
+              <button class="icon-btn" id="preview-download" aria-label="下载"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 20h14v-2H5v2zM12 2v12.17l3.59-3.58L17 12l-5 5-5-5 1.41-1.41L11 14.17V2h1z"/></svg></button>
+              <a class="icon-btn" href="./mobile-files.html" aria-label="关闭"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></a>
+            </div>
+          </div>
+          <div class="preview-tabs">
+            <button class="btn active" data-preview="image">图片</button>
+            <button class="btn" data-preview="pdf">PDF</button>
+            <button class="btn" data-preview="text">文本</button>
+          </div>
+          <div class="preview-stage" data-preview-panel="image">
+            <div class="preview-image"></div>
+          </div>
+          <div class="preview-stage light hidden" data-preview-panel="pdf">
+            <div class="preview-pdf">
+              <h2>PDF 预览</h2>
+              <p>用于展示 PDF 基础阅读区域。真实实现将替换为 PDF 渲染组件。</p>
+              <p>可从文件列表点击 PDF 进入；下载会写入传输任务。</p>
+            </div>
+          </div>
+          <div class="preview-stage hidden" data-preview-panel="text">
+            <div class="preview-text"># 文本预览
+
+从文件列表进入后，这里显示文本内容示意。
+一期支持基础文本阅读，不做在线编辑。
+</div>
+          </div>
+          <div class="preview-stage light hidden" data-preview-panel="file">
+            <div class="preview-pdf">
+              <h2>暂不支持预览</h2>
+              <p>当前类型仅支持下载。可点击右上角下载，并在传输页查看任务。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./js/prototype.js"></script>
+</body>
+</html>
