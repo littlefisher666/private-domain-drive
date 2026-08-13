@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>macOS · Cupertino · 传输中心 · 私域网盘</title>
+  <link rel="stylesheet" href="./css/macos-variants.css" />
+</head>
+<body class="mv-page">
+  <div class="mv-toolbar">
+    <div class="left">
+      <a class="mv-btn" href="./index.html">返回目录</a>
+      <span class="label">macOS · Cupertino · 传输中心</span>
+    </div>
+    <div class="right">
+      <span class="label">上传进度 / 下载进度 / 失败重试</span>
+      <a class="mv-btn" href="./desktop-files.html">共享空间</a>
+    </div>
+  </div>
+
+  <div class="mv-shell">
+    <div class="cup desktop-screen" id="cup-root">
+      <div class="cup-titlebar">
+        <div class="cup-lights"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <div class="cup-title">传输中心</div>
+        <div></div>
+      </div>
+
+      <div class="cup-body cup-body-two">
+        <aside class="cup-sidebar">
+          <div class="cup-brand">
+            <div class="cup-brand-mark">PD</div>
+            <div>
+              <strong>私域网盘</strong>
+              <span>Cupertino Desktop</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="cup-section-title">功能</div>
+            <nav class="cup-nav">
+              <a href="./desktop-files.html"><span class="ico">📁</span>共享空间</a>
+              <a class="active" href="./desktop-tasks.html"><span class="ico">⇅</span>传输中心</a>
+            </nav>
+          </div>
+
+          <div class="cup-user">
+            <strong>family.admin</strong>
+            <span>会话有效 · STS 临时凭证</span>
+          </div>
+        </aside>
+
+        <main class="cup-main">
+          <div class="cup-toolbar">
+            <div>
+              <h1>传输中心</h1>
+              <p>上传 / 下载进度展示，失败可重试，进行中可取消</p>
+            </div>
+          </div>
+
+          <div class="cup-content">
+            <div id="task-list" class="cup-task-list"></div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <div class="mv-note">
+    <strong>传输中心：</strong>
+    与 Android 共用任务状态；桌面端用 Cupertino 列表卡片呈现进度、失败重试与取消。
+  </div>
+
+  <script src="./js/prototype.js"></script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>私域网盘 UI 原型</title>
+  <link rel="stylesheet" href="./css/prototype.css" />
+</head>
+<body class="gallery-body">
+  <div class="gallery">
+    <div class="gallery-hero">
+      <section class="gallery-card">
+        <div class="gallery-kicker">Private Domain Drive · UI Prototype</div>
+        <h1>基于 PRD 的一期 HTML 原型</h1>
+        <p class="gallery-lead">
+          面向 5 人以内小范围共享场景，覆盖登录成败、目录/文件 CRUD、列表/缩略图浏览、上传下载、预览、权限、传输任务，以及 Android 系统分享导入。
+          Android 以窄屏触控、底部导航、列表 + FAB 为主；macOS 以 Cupertino 宽屏双栏/三栏和拖拽上传为主。
+        </p>
+        <div class="meta-grid">
+          <div class="meta-item"><strong>产品定位</strong><span>轻量私人共享文件 App，不是完整商业网盘</span></div>
+          <div class="meta-item"><strong>目标平台</strong><span>Android 390×844 · macOS 1280×820 固定画布</span></div>
+          <div class="meta-item"><strong>一期能力</strong><span>登录成败、目录/文件 CRUD、列表/缩略图、上传下载、预览、权限、系统分享</span></div>
+          <div class="meta-item"><strong>明确不做</strong><span>公开分享、回收站、在线编辑、复杂搜索</span></div>
+        </div>
+      </section>
+      <section class="gallery-card">
+        <div class="gallery-kicker">Scope</div>
+        <h1 class="scope-title">一期范围提醒</h1>
+        <p class="gallery-lead">原型只表达信息架构、核心流程和权限差异，不模拟真实 OSS / STS 请求。</p>
+        <div class="scope-list">
+          <div class="scope-item"><span class="dot"></span><span>登录后换取临时凭证，再进入共享文件空间</span></div>
+          <div class="scope-item"><span class="dot"></span><span>按目录浏览 common / photos / docs / uploads</span></div>
+          <div class="scope-item"><span class="dot"></span><span>图片、PDF、文本预览；删除需二次确认</span></div>
+          <div class="scope-item"><span class="dot"></span><span>Android 接收系统分享后，选择目标文件夹再上传</span></div>
+          <div class="scope-item"><span class="dot"></span><span>目录支持列表 / 缩略图切换；缩略图仅图片，其他类型默认图标</span></div>
+          <div class="scope-item"><span class="dot"></span><span>Android 统一浅/深色主题与移动端交互，不复用桌面 hover 模式</span></div>
+          <div class="scope-item out"><span class="dot"></span><span>不做对外公开链接、评论标签、版本历史、后台成员管理</span></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="section-head">
+      <div>
+        <h2>Android 移动端</h2>
+        <p>窄屏触控布局：应用栏 + 列表 + FAB + 底部导航；支持系统分享导入</p>
+      </div>
+    </div>
+    <div class="screen-grid">
+      <article class="screen-card">
+        <div class="screen-preview"><div class="mini-phone"><div class="mini-bar"></div><div class="mini-row mid"></div><div class="mini-row"></div><div class="mini-row short"></div></div></div>
+        <div class="screen-body">
+          <h3>登录</h3>
+          <p>支持管理员/成员成功登录，以及错误口令失败提示。</p>
+          <div class="tag-row"><span class="tag primary">9.1 登录</span><span class="tag">凭证获取</span></div>
+          <a class="btn btn-primary btn-block" href="./mobile-login.html">打开原型</a>
+        </div>
+      </article>
+      <article class="screen-card">
+        <div class="screen-preview"><div class="mini-phone"><div class="mini-bar"></div><div class="mini-row"></div><div class="mini-row mid"></div><div class="mini-row"></div><div class="mini-row short"></div></div></div>
+        <div class="screen-body">
+          <h3>文件浏览</h3>
+          <p>目录进出、列表/缩略图、新建、重命名、删除、上传下载，数据跨页保留。</p>
+          <div class="tag-row"><span class="tag primary">9.2 浏览</span><span class="tag">US-16 列表/缩略图</span></div>
+          <a class="btn btn-primary btn-block" href="./mobile-files.html">打开原型</a>
+        </div>
+      </article>
+      <article class="screen-card">
+        <div class="screen-preview"><div class="mini-phone"><div class="mini-bar"></div><div class="mini-row short"></div><div class="mini-row mid"></div></div></div>
+        <div class="screen-body">
+          <h3>空目录</h3>
+          <p>空状态提示清晰，引导有权限用户上传首个文件。</p>
+          <div class="tag-row"><span class="tag primary">空状态</span><span class="tag">上传引导</span></div>
+          <a class="btn btn-primary btn-block" href="./mobile-empty.html">打开原型</a>
+        </div>
+      </article>
+      <article class="screen-card">
+        <div class="screen-preview"><div class="mini-phone"><div class="mini-bar"></div><div class="mini-row mid"></div><div class="mini-row"></div><div class="mini-row short"></div></div></div>
+        <div class="screen-body">
+          <h3>系统分享上传</h3>
+          <p>从相册批量分享进入 App，选择目标文件夹后确认上传。</p>
+          <div class="tag-row"><span class="tag primary">9.8 分享接入</span><span class="tag">选目录上传</span></div>
+          <a class="btn btn-primary btn-block" href="./mobile-share.html">打开原型</a>
+        </div>
+      </article>
+      <article class="screen-card">
+        <div class="screen-preview"><div class="mini-phone"><div class="mini-bar"></div><div class="mini-row"></div><div class="mini-row mid"></div><div class="mini-row short"></div></div></div>
+        <div class="screen-body">
+          <h3>传输任务</h3>
+          <p>上传/下载进度、失败重试，覆盖传输反馈要求。</p>
+          <div class="tag-row"><span class="tag primary">9.3 上传</span><span class="tag">9.4 下载</span></div>
+          <a class="btn btn-primary btn-block" href="./mobile-tasks.html">打开原型</a>
+        </div>
+      </article>
+      <article class="screen-card">
+        <div class="screen-preview"><div class="mini-phone"><div class="mini-bar"></div><div class="mini-row mid"></div><div class="mini-row"></div></div></div>
+        <div class="screen-body">
+          <h3>文件预览</h3>
+          <p>图片、PDF、文本三类一期预览能力切换示意。</p>
+          <div class="tag-row"><span class="tag primary">9.5 预览</span><span class="tag">图片/PDF/文本</span></div>
+          <a class="btn btn-primary btn-block" href="./mobile-preview.html">打开原型</a>
+        </div>
+      </article>
+      <article class="screen-card">
+        <div class="screen-preview"><div class="mini-phone"><div class="mini-bar"></div><div class="mini-row short"></div><div class="mini-row"></div></div></div>
+        <div class="screen-body">
+          <h3>异常与确认</h3>
+          <p>凭证失效、权限不足、删除二次确认等错误与安全交互。</p>
+          <div class="tag-row"><span class="tag primary">9.7 错误处理</span><span class="tag">删除确认</span></div>
+          <a class="btn btn-primary btn-block" href="./mobile-states.html">打开原型</a>
+        </div>
+      </article>
+    </div>
+
+
+    <div class="section-head">
+      <div>
+        <h2>Android 视觉与交互约定</h2>
+        <p>实现与原型均以此为准，避免桌面样式直接缩放到手机</p>
+      </div>
+    </div>
+    <div class="screen-grid">
+      <article class="screen-card">
+        <div class="screen-body">
+          <h3>主题统一</h3>
+          <p>全应用统一浅色/深色主题。登录、文件、传输、预览、我的不应出现长期硬编码的另一套背景风格。</p>
+          <div class="tag-row"><span class="tag primary">9.9</span><span class="tag">主题一致</span></div>
+        </div>
+      </article>
+      <article class="screen-card">
+        <div class="screen-body">
+          <h3>移动端骨架</h3>
+          <p>文件页使用顶部应用栏、列表主体、上传主操作（FAB）、底部主导航；不使用桌面式顶部多按钮工具条作为主结构。</p>
+          <div class="tag-row"><span class="tag primary">AppBar</span><span class="tag">FAB</span><span class="tag">BottomNav</span></div>
+        </div>
+      </article>
+      <article class="screen-card">
+        <div class="screen-body">
+          <h3>触控操作</h3>
+          <p>预览、下载、删除、重命名通过点击、长按或更多菜单完成，不依赖鼠标悬停显示操作。</p>
+          <div class="tag-row"><span class="tag primary">长按/更多</span><span class="tag">无 hover 依赖</span></div>
+        </div>
+      </article>
+      <article class="screen-card">
+        <div class="screen-body">
+          <h3>分享导入</h3>
+          <p>系统分享进入后先确认待上传内容与目标目录，再创建传输任务；未登录时先恢复会话再回到确认页。</p>
+          <div class="tag-row"><span class="tag primary">SEND</span><span class="tag">SEND_MULTIPLE</span></div>
+        </div>
+      </article>
+      <article class="screen-card">
+        <div class="screen-body">
+          <h3>列表 / 缩略图</h3>
+          <p>目录可切换浏览方式。缩略图仅图片显示预览，文件夹与其他类型使用默认图标。</p>
+          <div class="tag-row"><span class="tag primary">US-16</span><span class="tag">浏览方式</span></div>
+        </div>
+      </article>
+    </div>
+    <div class="section-head">
+      <div>
+        <h2>macOS 桌面端 · Cupertino</h2>
+        <p>宽屏三栏 / 双栏，统一 Cupertino 视觉：系统蓝、毛玻璃侧栏、圆角分组列表、胶囊分段控件</p>
+      </div>
+    </div>
+    <div class="screen-grid">
+      <article class="screen-card">
+        <div class="screen-preview">
+          <div class="mini-desktop">
+            <div class="mini-side"></div>
+            <div>
+              <div class="mini-bar"></div>
+              <div class="mini-row"></div>
+              <div class="mini-row mid"></div>
+              <div class="mini-row short"></div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-body">
+          <h3>桌面文件空间</h3>
+          <p>Cupertino 三栏：侧栏导航 + 分组文件列表 + 详情预览，支持拖拽上传与列表/缩略图切换。</p>
+          <div class="tag-row"><span class="tag primary">Cupertino</span><span class="tag">拖拽上传</span><span class="tag">列表/缩略图</span></div>
+          <a class="btn btn-primary btn-block" href="./desktop-files.html">打开原型</a>
+        </div>
+      </article>
+      <article class="screen-card">
+        <div class="screen-preview">
+          <div class="mini-desktop">
+            <div class="mini-side"></div>
+            <div>
+              <div class="mini-bar"></div>
+              <div class="mini-row mid"></div>
+              <div class="mini-row"></div>
+            </div>
+          </div>
+        </div>
+        <div class="screen-body">
+          <h3>桌面传输中心</h3>
+          <p>Cupertino 卡片列表集中查看上传下载进度，并提供失败重试入口。</p>
+          <div class="tag-row"><span class="tag primary">Cupertino</span><span class="tag">任务管理</span><span class="tag">重试</span></div>
+          <a class="btn btn-primary btn-block" href="./desktop-tasks.html">打开原型</a>
+        </div>
+      </article>
+    </div>
+
+    <div class="flow-note">
+      建议体验路径：登录（成功/失败）→ 文件浏览（进出目录、列表/缩略图、新建/重命名/删除/上传）→ 预览/下载 → 系统分享上传 → 传输任务重试/取消 → 我的页退出或重置。对应 docs/PRD.md、用户故事.md、功能需求.md。
+      原型状态保存在浏览器 sessionStorage，跨页面可闭环演示；不连接真实后端。
+    </div>
+  </div>
+</body>
+</html>

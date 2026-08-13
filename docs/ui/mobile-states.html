@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>我的 · 私域网盘</title>
+  <link rel="stylesheet" href="./css/prototype.css" />
+</head>
+<body>
+  <div class="device-page">
+    <div>
+      <div class="device-toolbar">
+        <div class="left"><a class="btn btn-secondary" href="./index.html">返回目录</a></div>
+        <div class="right">
+          <label class="label" for="role-switch">角色</label>
+          <select id="role-switch" class="field role-select">
+            <option value="admin">管理员</option>
+            <option value="member">普通成员</option>
+          </select>
+        </div>
+      </div>
+      <div class="phone-shell">
+        <div class="phone-screen android">
+          <div class="status-bar"><span>09:41</span><span>5G ▮▮▮</span></div>
+          <div class="app-header">
+            <div>
+              <h1>我的</h1>
+              <p class="subtitle">账户、异常与演示重置</p>
+            </div>
+          </div>
+          <div class="app-content stack">
+            <div class="profile-card">
+              <div class="avatar" id="profile-avatar">A</div>
+              <div class="meta">
+                <strong id="profile-name">family.admin</strong>
+                <span id="profile-role">管理员 · 可浏览 / 下载 / 上传 / 删除</span>
+              </div>
+            </div>
+            <div class="progress-card">
+              <strong class="section-title">会话与权限</strong>
+              <p class="small muted card-note">用于演示凭证失效和权限不足时的提示方式。</p>
+              <div class="inline-actions">
+                <button class="btn btn-secondary" data-show="#session-modal">凭证失效</button>
+                <button class="btn btn-secondary" data-show="#permission-modal">权限不足</button>
+              </div>
+            </div>
+            <div class="progress-card">
+              <strong class="section-title">危险操作</strong>
+              <p class="small muted card-note">删除需要二次确认；可在文件页对真实列表演练。</p>
+              <button class="btn btn-danger" data-show="#delete-modal">删除示例确认</button>
+            </div>
+            <div class="progress-card">
+              <strong class="section-title">演示数据</strong>
+              <p class="small muted card-note">清空登录态、目录变更和传输任务，恢复初始样例。</p>
+              <button class="btn btn-secondary btn-block" id="btn-reset-demo">重置原型数据</button>
+            </div>
+            <a class="btn btn-secondary btn-block" id="btn-logout" href="./mobile-login.html">退出登录</a>
+          </div>
+
+          <div class="bottom-nav">
+            <a class="nav-item" data-nav="files" href="./mobile-files.html"><span class="nav-ico"></span><span>文件</span></a>
+            <a class="nav-item" data-nav="tasks" href="./mobile-tasks.html"><span class="nav-ico"></span><span>传输</span></a>
+            <a class="nav-item active" data-nav="me" href="./mobile-states.html"><span class="nav-ico"></span><span>我的</span></a>
+          </div>
+
+          <div id="session-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+              <h3>会话已失效</h3>
+              <p>临时凭证已过期，请重新获取后继续操作。</p>
+              <div class="modal-actions">
+                <button class="btn btn-secondary" data-hide="#session-modal">稍后</button>
+                <button class="btn btn-primary" data-hide="#session-modal" data-toast="已重新获取临时凭证">恢复会话</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="permission-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+              <h3>权限不足</h3>
+              <p>当前身份没有执行该操作的权限。</p>
+              <div class="modal-actions">
+                <button class="btn btn-primary btn-block" data-hide="#permission-modal">知道了</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="delete-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+              <h3>删除此文件？</h3>
+              <p>将删除“家庭合影.jpg”。一期没有回收站。</p>
+              <div class="modal-actions">
+                <button class="btn btn-secondary" data-hide="#delete-modal">取消</button>
+                <button class="btn btn-danger" data-hide="#delete-modal" data-toast="这是确认弹窗示意，真实删除请在文件页操作">知道了</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./js/prototype.js"></script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>macOS · Cupertino · 共享空间 · 私域网盘</title>
+  <link rel="stylesheet" href="./css/macos-variants.css" />
+</head>
+<body class="mv-page">
+  <div class="mv-toolbar">
+    <div class="left">
+      <a class="mv-btn" href="./index.html">返回目录</a>
+      <span class="label">macOS · Cupertino · 宽屏三栏</span>
+    </div>
+    <div class="right">
+      <label class="label" for="role-switch">角色</label>
+      <select id="role-switch" class="cup-select">
+        <option value="admin">管理员</option>
+        <option value="member">普通成员</option>
+      </select>
+      <a class="mv-btn" href="./desktop-tasks.html">传输中心</a>
+    </div>
+  </div>
+
+  <div class="mv-shell">
+    <div class="cup desktop-screen" id="cup-root">
+      <div class="cup-titlebar">
+        <div class="cup-lights"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+        <div class="cup-title">私域网盘</div>
+        <div class="cup-titlebar-actions">
+          <button class="cup-btn primary" type="button" id="desktop-upload-top" data-role-admin>上传</button>
+        </div>
+      </div>
+
+      <div class="cup-body">
+        <aside class="cup-sidebar">
+          <div class="cup-brand">
+            <div class="cup-brand-mark">PD</div>
+            <div>
+              <strong>私域网盘</strong>
+              <span>Cupertino Desktop</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="cup-section-title">功能</div>
+            <nav class="cup-nav">
+              <a class="active" href="./desktop-files.html"><span class="ico">📁</span>共享空间</a>
+              <a href="./desktop-tasks.html"><span class="ico">⇅</span>传输中心</a>
+            </nav>
+          </div>
+
+          <div>
+            <div class="cup-section-title">目录</div>
+            <nav class="cup-nav" id="desktop-dir-nav">
+              <button type="button" class="active" data-desktop-nav="shared/"><span class="ico">•</span>shared/</button>
+              <button type="button" data-desktop-nav="shared/common/"><span class="ico">•</span>common/</button>
+              <button type="button" data-desktop-nav="shared/photos/"><span class="ico">•</span>photos/</button>
+              <button type="button" data-desktop-nav="shared/docs/"><span class="ico">•</span>docs/</button>
+              <button type="button" data-desktop-nav="shared/uploads/"><span class="ico">•</span>uploads/</button>
+            </nav>
+          </div>
+
+          <div class="cup-user">
+            <strong id="desktop-user-name">family.admin</strong>
+            <span>当前身份：<span data-role-label class="chip admin">管理员</span> · STS 有效</span>
+          </div>
+        </aside>
+
+        <main class="cup-main">
+          <div class="cup-toolbar">
+            <div class="cup-toolbar-path">
+              <button class="cup-btn cup-back hidden" type="button" id="desktop-go-up" aria-label="返回上级">‹ 上级</button>
+              <div class="cup-path-text">
+                <div class="cup-path-title-clip" id="desktop-path-title" title="shared/">
+                  <span class="cup-path-title-text">shared/</span>
+                </div>
+                <p id="desktop-path-hint">按目录浏览 · 支持列表 / 缩略图 · 拖拽上传</p>
+              </div>
+            </div>
+            <div class="cup-toolbar-actions">
+              <div class="cup-seg" role="group" aria-label="浏览方式">
+                <button type="button" class="active" data-view-mode="list">列表</button>
+                <button type="button" data-view-mode="grid">缩略图</button>
+              </div>
+              <button class="cup-btn" type="button" id="desktop-refresh">刷新</button>
+              <button class="cup-btn" type="button" id="desktop-mkdir" data-role-admin>新建文件夹</button>
+              <button class="cup-btn primary" type="button" id="desktop-upload" data-role-admin>上传文件</button>
+            </div>
+          </div>
+
+          <div class="cup-content">
+            <div class="cup-note hidden" data-role-member>
+              普通成员视图：隐藏上传与删除，仅保留浏览和下载。
+            </div>
+
+            <div id="dropzone" class="cup-drop" data-role-admin>
+              <strong>拖拽文件到这里上传</strong>
+              <span>macOS 支持拖拽上传；也可点击选择文件。大文件将走分片上传。</span>
+            </div>
+
+            <div id="desktop-table-wrap" class="cup-list-wrap">
+              <div class="cup-list" id="desktop-file-body"></div>
+            </div>
+            <div id="desktop-file-grid" class="cup-grid hidden"></div>
+          </div>
+        </main>
+
+        <aside class="cup-preview">
+          <div class="cup-preview-head">
+            <h2>详情预览</h2>
+            <p>选中文件后展示基础信息</p>
+          </div>
+          <div class="cup-preview-body">
+            <div class="cup-preview-art" id="desktop-preview-art">IMG</div>
+            <strong id="desktop-preview-name">家庭合影.jpg</strong>
+            <div class="cup-kv">
+              <div><span>类型</span><strong id="desktop-preview-type">图片</strong></div>
+              <div><span>大小</span><strong id="desktop-preview-size">2.4 MB</strong></div>
+              <div><span>路径</span><strong id="desktop-preview-path">shared/</strong></div>
+              <div><span>更新</span><strong id="desktop-preview-time">今天 09:12</strong></div>
+              <div>
+                <span>能力</span>
+                <strong data-role-admin>可下载 / 可删除</strong>
+                <strong data-role-member class="hidden">可下载</strong>
+              </div>
+            </div>
+            <div class="cup-preview-actions">
+              <button class="cup-btn primary" type="button" id="desktop-preview-download">下载</button>
+              <button class="cup-btn" type="button" id="desktop-preview-open">预览 / 打开</button>
+              <button class="cup-btn" type="button" id="desktop-preview-delete" data-role-admin>删除</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div id="delete-modal" class="modal-overlay hidden">
+        <div class="modal-card cup-modal">
+          <h3>确认删除？</h3>
+          <p id="delete-desc">删除后文件将从共享空间移除。一期不提供回收站。</p>
+          <div class="modal-actions">
+            <button class="cup-btn" type="button" data-hide="#delete-modal">取消</button>
+            <button class="cup-btn danger" type="button" id="desktop-confirm-delete">删除</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="mkdir-modal" class="modal-overlay hidden">
+        <div class="modal-card cup-modal">
+          <h3>新建文件夹</h3>
+          <p>在当前目录下创建新文件夹。</p>
+          <label class="cup-field">
+            <span>文件夹名称</span>
+            <input id="mkdir-input" type="text" value="新建文件夹" maxlength="64" autocomplete="off" />
+          </label>
+          <p class="cup-field-error hidden" id="mkdir-error"></p>
+          <div class="modal-actions">
+            <button class="cup-btn" type="button" data-hide="#mkdir-modal">取消</button>
+            <button class="cup-btn primary" type="button" id="desktop-confirm-mkdir">创建</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mv-note">
+    <strong>macOS 视觉约定：</strong>
+    桌面端统一采用 Cupertino 语言——系统蓝 <code>#007AFF</code>、毛玻璃侧栏、大圆角分组列表、胶囊分段控件。
+    业务交互与 Android 共享同一套原型状态（sessionStorage）。
+  </div>
+
+  <script src="./js/prototype.js"></script>
+</body>
+</html>
