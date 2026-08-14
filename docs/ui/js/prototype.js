@@ -62,6 +62,11 @@ function formatSize(size) {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function displayPath(path) {
+  if (!path || path === 'shared/') return '全部文件';
+  return path.replace(/^shared\//, '').replace(/\/$/, '') || '全部文件';
+}
+
 function parentPath(path) {
   if (!path || path === 'shared/') return 'shared/';
   const normalized = path.endsWith('/') ? path.slice(0, -1) : path;
@@ -1259,7 +1264,7 @@ function bindDesktopFilesPage() {
     if (nameEl) nameEl.textContent = item.name;
     if (typeEl) typeEl.textContent = typeLabel(type);
     if (sizeEl) sizeEl.textContent = item.isDirectory ? '—' : formatSize(item.size);
-    if (pathEl) pathEl.textContent = path;
+    if (pathEl) pathEl.textContent = displayPath(path);
     if (timeEl) timeEl.textContent = item.updatedAt || '—';
   }
 
