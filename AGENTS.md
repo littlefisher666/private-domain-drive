@@ -146,6 +146,10 @@
 - Android 与 macOS 共用大部分业务逻辑
 - 平台差异尽量收敛在基础设施适配层
 - 目录结构、分层设计优先遵循 `docs/Flutter架构设计.md`
+- Android 与 macOS 客户端启动都必须从 `client/env/local.json` 注入环境配置，使用命令：
+  - macOS：`flutter run -d macos --dart-define-from-file=env/local.json`
+  - Android：`flutter run -d android --dart-define-from-file=env/local.json`
+- 不得使用未注入环境配置的普通 `flutter run -d macos` 或 `flutter run -d android` 作为联调启动方式；不得将环境文件中的真实凭证写入源码或提交到仓库
 
 ### 服务端约束
 
