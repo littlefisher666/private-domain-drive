@@ -81,6 +81,8 @@ domain        -> 实体、能力模型、任务状态、领域规则
 infrastructure-> FC API、OSS SDK、本地存储、平台适配
 ```
 
+OSS 平台差异收敛在本地 Flutter 插件 `packages/private_domain_oss/`：Dart facade 定义统一方法、模型、错误码和事件；Android Kotlin 使用 OSS Android SDK `2.9.21`；macOS Swift 使用 OSS SDK for Swift V2 `0.3.0`，最低支持 macOS 12.0。MethodChannel 仅传递配置、对象参数和本地路径，EventChannel 按 `taskId` 上报累计传输字节。
+
 依赖方向固定为：
 
 `presentation -> application -> domain`
@@ -331,6 +333,7 @@ class TransferTask {
 - `RetryTransferTaskUseCase`
 - `CancelTransferTaskUseCase`
 - `ObserveTransferTasksUseCase`
+- `ConfigureTransferConcurrencyUseCase`
 
 #### 上传策略
 
@@ -338,12 +341,19 @@ class TransferTask {
 - 大文件分片上传
 - 同名文件：覆盖前确认
 - 成功后通知 workspace 刷新目标目录
+- 文件选择使用 `withData: false`，任务只保存本地源路径、对象键和文件大小
+- SDK字节回调达到总量后进入“正在确认”，最终成功以 OSS响应为准
 
 #### 下载策略
 
 - 文件可下载，文件夹一期不支持打包下载
 - 支持默认目录或用户选择目录
 - 成功后提供打开文件 / 打开目录入口（平台能力允许时）
+- 多选下载一次选择目录，每个文件独立任务；队列总并发数为 1 至 5，默认 3
+- 下载使用流式写入，避免批量下载时将完整文件保留在内存中
+- 原生 SDK写入临时路径，成功后改名，失败或取消删除临时文件
+- 上传下载速度由 Flutter 使用最近 2 秒字节窗口计算，并按 100ms 节流 UI
+- 运行中取消通过平台桥接中止 SDK请求，退出登录同步清理原生凭证
 
 ### 4.5 preview 模块
 
