@@ -1,4 +1,8 @@
-## ADDED Requirements
+## Purpose
+
+定义客户端从已安装 Android APK 或 macOS App Bundle 读取运行时版本，并在设置页展示、登录请求上报和静态更新清单比较中统一使用该版本的规则。
+
+## Requirements
 
 ### Requirement: 读取运行时应用版本
 客户端 SHALL 从当前已安装的 Android APK 或 macOS App Bundle 读取产品版本和构建号，作为当前运行版本的唯一来源。
@@ -12,7 +16,7 @@
 - **THEN** 页面 SHALL 显示当前运行的产品版本，且不得展示硬编码版本字符串
 
 ### Requirement: 统一使用产品版本
-客户端 SHALL 使用当前运行的产品版本向 FC 请求传递 `appVersion`，并用于与 GitHub Release tag 的语义化版本比较。
+客户端 SHALL 使用当前运行的产品版本向 FC 请求传递 `appVersion`，并用于与静态更新清单中产品版本的语义化比较。
 
 #### Scenario: 登录请求上报版本
 - **WHEN** 用户发起登录

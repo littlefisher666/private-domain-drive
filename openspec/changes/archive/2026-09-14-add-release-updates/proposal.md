@@ -4,11 +4,12 @@
 
 ## What Changes
 
-- 新增基于 GitHub Releases 的稳定版更新检查、版本比较和更新说明展示。
+- 新增基于 GitHub Release 随附静态更新清单的稳定版更新检查、版本比较和更新说明展示。
 - 将客户端运行版本改为从已安装包读取，统一用于界面展示、FC 请求和更新比较。
 - Android 下载与校验 Release APK 后交由系统安装器完成覆盖安装。
 - macOS 提供 DMG 下载与手动替换应用的引导，不尝试绕过 Gatekeeper 或在未签名条件下自更新。
 - 将正式发布工作流调整为可配置的 Android 发布签名，并发布 macOS DMG。
+- 调试登录预填信息改由本地构建配置注入，确保 profile 和 release 包不包含默认账号或口令。
 
 ## Capabilities
 
@@ -24,5 +25,5 @@
 ## Impact
 
 - 客户端：启动组装、设置页、认证请求、网络与平台适配代码。
-- 发布：GitHub Actions Release 工作流和发布资产格式。
-- 新增 Flutter 运行版本读取、APK 下载与安装相关依赖；GitHub API 将作为公开的更新元数据来源。
+- 发布：GitHub Actions Release 工作流、发布资产格式与登录调试配置。
+- 新增 Flutter 运行版本读取、APK 下载与安装相关依赖；GitHub Release 的静态更新清单将作为公开的更新元数据来源。
