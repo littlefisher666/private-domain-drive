@@ -16,14 +16,12 @@
       <div class="phone-shell">
         <div class="phone-screen android">
           <div class="status-bar"><span>09:41</span><span>5G ▮▮▮</span></div>
-          <div class="login-wrap">
-            <div class="brand">
-              <div class="brand-badge">PD</div>
-              <h1>空目录演示</h1>
-              <p>将进入 shared/uploads，可在文件页新建/上传后观察列表变化。</p>
-            </div>
-            <button class="btn btn-primary btn-block" id="go-empty">打开 uploads 空目录</button>
-            <a class="btn btn-secondary btn-block mt-12" href="./mobile-files.html">直接去文件页</a>
+          <div class="app-header"><div><h1>共享空间</h1><p class="subtitle">family.admin · uploads</p></div><button class="icon-btn" type="button" aria-label="刷新">↻</button></div>
+          <div class="path-bar"><span class="path-chip">shared / uploads</span></div>
+          <div class="view-toolbar"><div class="view-mode-toggle"><button class="view-mode-btn active" type="button">列表</button><button class="view-mode-btn" type="button">缩略图</button></div></div>
+          <div class="app-content stack">
+            <div class="empty-state"><div class="emoji"></div><h3>当前目录为空</h3><p>可以新建文件夹或上传文件。</p><button class="btn btn-primary" id="go-empty">上传或新建</button></div>
+            <a class="btn btn-secondary btn-block" href="./mobile-files.html">返回文件列表</a>
           </div>
         </div>
       </div>

@@ -11,13 +11,7 @@
     <div>
       <div class="device-toolbar">
         <div class="left"><a class="btn btn-secondary" href="./index.html">返回目录</a></div>
-        <div class="right">
-          <label class="label" for="role-switch">角色</label>
-          <select id="role-switch" class="field role-select">
-            <option value="admin">管理员</option>
-            <option value="member">普通成员</option>
-          </select>
-        </div>
+        <div class="right"><span class="label">Android · 我的</span></div>
       </div>
       <div class="phone-shell">
         <div class="phone-screen android">
@@ -25,10 +19,11 @@
           <div class="app-header">
             <div>
               <h1>我的</h1>
-              <p class="subtitle">账户、异常与演示重置</p>
+              <p class="subtitle">账户与应用信息</p>
             </div>
           </div>
           <div class="app-content stack">
+            <strong class="section-title">账户</strong>
             <div class="profile-card">
               <div class="avatar" id="profile-avatar">A</div>
               <div class="meta">
@@ -37,24 +32,20 @@
               </div>
             </div>
             <div class="progress-card">
-              <strong class="section-title">会话与权限</strong>
-              <p class="small muted card-note">用于演示凭证失效和权限不足时的提示方式。</p>
-              <div class="inline-actions">
-                <button class="btn btn-secondary" data-show="#session-modal">凭证失效</button>
-                <button class="btn btn-secondary" data-show="#permission-modal">权限不足</button>
-              </div>
+              <strong class="section-title">空间与应用</strong>
+              <div class="settings-row"><span class="settings-icon">▣</span><span><b>共享空间</b><small>文件与目录</small></span></div>
+              <div class="settings-row"><span class="settings-icon">ⓘ</span><span><b>应用版本</b><small>1.0.0</small></span></div>
+              <div class="settings-row"><span class="settings-icon">↻</span><span><b>检查更新</b><small>当前已是最新版本</small></span></div>
             </div>
             <div class="progress-card">
-              <strong class="section-title">危险操作</strong>
-              <p class="small muted card-note">删除需要二次确认；可在文件页对真实列表演练。</p>
-              <button class="btn btn-danger" data-show="#delete-modal">删除示例确认</button>
+              <strong class="section-title">显示</strong>
+              <div class="settings-row"><span class="settings-icon">☼</span><span><b>外观模式</b><small>浅色模式</small></span></div>
+              <div class="view-mode-toggle settings-theme-toggle"><button class="view-mode-btn active" type="button">☼ 浅色模式</button><button class="view-mode-btn" type="button">☾ 深色模式</button></div>
             </div>
             <div class="progress-card">
-              <strong class="section-title">演示数据</strong>
-              <p class="small muted card-note">清空登录态、目录变更和传输任务，恢复初始样例。</p>
-              <button class="btn btn-secondary btn-block" id="btn-reset-demo">重置原型数据</button>
+              <strong class="section-title">账户操作</strong>
+              <button class="btn btn-secondary btn-block" id="btn-logout" href="./mobile-login.html">退出登录</button>
             </div>
-            <a class="btn btn-secondary btn-block" id="btn-logout" href="./mobile-login.html">退出登录</a>
           </div>
 
           <div class="bottom-nav">

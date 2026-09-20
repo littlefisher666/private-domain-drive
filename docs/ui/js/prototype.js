@@ -475,6 +475,40 @@ function bindToggles() {
   });
 }
 
+function bindPrototypeTheme() {
+  const screen = $('.phone-screen.android');
+  if (!screen) return;
+
+  const params = new URLSearchParams(location.search);
+  const stored = sessionStorage.getItem('pdd-prototype-theme');
+  let mode = params.get('theme') || stored || 'light';
+  if (mode !== 'dark') mode = 'light';
+
+  const apply = () => {
+    screen.classList.toggle('light-theme', mode === 'light');
+    sessionStorage.setItem('pdd-prototype-theme', mode);
+    document.querySelectorAll('[data-prototype-theme]').forEach((button) => {
+      button.classList.toggle('active', button.dataset.prototypeTheme === mode);
+    });
+  };
+
+  const host = $('.device-toolbar .right');
+  if (host) {
+    const switcher = document.createElement('div');
+    switcher.className = 'prototype-theme-switch';
+    switcher.setAttribute('aria-label', '原型主题');
+    switcher.innerHTML = '<button type="button" data-prototype-theme="light">浅色</button><button type="button" data-prototype-theme="dark">深色</button>';
+    host.appendChild(switcher);
+    switcher.querySelectorAll('[data-prototype-theme]').forEach((button) => {
+      button.addEventListener('click', () => {
+        mode = button.dataset.prototypeTheme === 'dark' ? 'dark' : 'light';
+        apply();
+      });
+    });
+  }
+  apply();
+}
+
 function bindDropzone() {
   const zone = $('#dropzone');
   if (!zone) return;
@@ -839,6 +873,22 @@ function bindMobileFilesActions() {
     });
   }
 
+  const uploadDirectoryBtn = $('#btn-upload-directory');
+  if (uploadDirectoryBtn) {
+    uploadDirectoryBtn.addEventListener('click', () => {
+      hide($('#upload-sheet'));
+      const folderName = prompt('模拟上传文件夹名称', '旅行照片');
+      if (folderName == null) return;
+      const created = AppStore.createFolder(folderName);
+      if (created.ok) {
+        const targetPath = joinPath(AppStore.get().currentPath, folderName, true);
+        AppStore.addFiles(['IMG_0001.jpg', 'IMG_0002.jpg'], targetPath);
+      }
+      toast(created.message);
+      if (created.ok) renderMobileFilesPage();
+    });
+  }
+
   const uploadAlbumBtn = $('#btn-upload-album');
   if (uploadAlbumBtn) {
     uploadAlbumBtn.addEventListener('click', () => {
@@ -1015,13 +1065,16 @@ function bindTasksPage() {
 
   function render() {
     const tasks = AppStore.get().tasks;
+    const mobileToolbar = cupMode ? ''
+      : '<div class="task-toolbar"><span>1/3 进行中 · 0 等待</span><button type="button" data-toast="已清除已结束任务">清除已结束</button></div>'
+        + '<div class="task-filter"><button class="active" type="button">全部 ' + tasks.length + '</button><button type="button">上传 ' + tasks.filter((task) => task.kind === 'upload').length + '</button><button type="button">下载 ' + tasks.filter((task) => task.kind === 'download').length + '</button></div>';
     if (!tasks.length) {
-      list.innerHTML = cupMode
+      list.innerHTML = mobileToolbar + (cupMode
         ? '<div class="cup-empty"><h3>暂无传输任务</h3><p>上传、下载或系统分享后会显示在这里。</p></div>'
-        : '<div class="empty-state"><div class="emoji"></div><h3>暂无传输任务</h3><p>上传、下载或系统分享后会显示在这里。</p></div>';
+        : '<div class="empty-state"><div class="emoji"></div><h3>暂无传输任务</h3><p>上传、下载或系统分享后会显示在这里。</p></div>');
       return;
     }
-    list.innerHTML = tasks.map((task) => {
+    list.innerHTML = mobileToolbar + tasks.map((task) => {
       const statusText = {
         pending: '等待中',
         running: task.kind === 'upload' ? '上传中' : '下载中',
@@ -1066,6 +1119,11 @@ function bindTasksPage() {
         render();
       });
     });
+    list.querySelectorAll('[data-toast]').forEach((btn) => btn.addEventListener('click', () => {
+      AppStore.commit((state) => { state.tasks = state.tasks.filter((task) => task.status === 'running' || task.status === 'pending'); });
+      toast(btn.getAttribute('data-toast'));
+      render();
+    }));
   }
 
   document.addEventListener('pdd:tasks-updated', render);
@@ -1626,6 +1684,7 @@ function bindDesktopFilesPage() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  bindPrototypeTheme();
   bindToggles();
   bindDropzone();
   bindRoleSwitch();

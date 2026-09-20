@@ -2160,3 +2160,267 @@ img { display: block; max-width: 100%; }
   text-align: center;
   color: #64748b;
 }
+
+/* ===== Android prototype: synchronized with client/lib/app/theme/app_theme.dart ===== */
+.phone-screen.android {
+  --android-primary: #2563eb;
+  --android-secondary: #0f766e;
+  --android-surface: #f8fafc;
+  --android-background: #f1f5f9;
+  --android-ink: #0f172a;
+  --android-muted: #475569;
+  --android-outline: #cbd5e1;
+  --android-outline-soft: #e2e8f0;
+  background: var(--android-background);
+  color: var(--android-ink);
+  font-family: Roboto, "Noto Sans SC", "PingFang SC", sans-serif;
+}
+.phone-screen.android .app-header {
+  min-height: 62px;
+  padding: 4px 12px 4px 16px;
+  background: transparent;
+}
+.phone-screen.android .app-header h1 { font-size: 24px; font-weight: 700; color: var(--android-ink); }
+.phone-screen.android .subtitle { color: var(--android-muted); }
+.phone-screen.android .icon-btn { color: var(--android-muted); }
+.phone-screen.android .icon-btn:hover { color: var(--android-ink); background: rgba(37,99,235,.08); }
+.phone-screen.android .path-chip {
+  min-height: 42px;
+  color: var(--android-muted);
+  background: var(--android-outline-soft);
+  border-radius: 16px;
+  font-weight: 500;
+}
+.phone-screen.android .view-toolbar { padding: 0 16px 12px; }
+.phone-screen.android .view-mode-toggle {
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--android-outline-soft);
+}
+.phone-screen.android .view-mode-btn { min-height: 32px; color: var(--android-muted); border-radius: 9px; font-weight: 600; }
+.phone-screen.android .view-mode-btn.active { color: var(--android-ink); background: var(--android-surface); box-shadow: 0 1px 2px rgba(15,23,42,.14); }
+.phone-screen.android .view-mode-hint { color: var(--android-muted); }
+.phone-screen.android .app-content { padding: 0 16px 16px; background: transparent; }
+.phone-screen.android .app-content.stack { gap: 12px; padding-top: 2px; }
+.phone-screen.android .permission-note,
+.phone-screen.android .progress-card,
+.phone-screen.android .profile-card,
+.phone-screen.android .share-target {
+  border-color: var(--android-outline-soft);
+  background: var(--android-surface);
+  border-radius: 16px;
+  box-shadow: none;
+}
+.phone-screen.android .permission-note { color: var(--android-muted); }
+.phone-screen.android .file-list { gap: 8px; }
+.phone-screen.android .file-item {
+  min-height: 68px;
+  padding: 10px 12px;
+  border: 1px solid var(--android-outline-soft);
+  border-radius: 16px;
+  box-shadow: none;
+  background: var(--android-surface);
+}
+.phone-screen.android .file-item:hover,
+.phone-screen.android .file-item.active { border-color: var(--android-primary); box-shadow: none; transform: none; }
+.phone-screen.android .file-meta strong { color: var(--android-ink); font-weight: 600; }
+.phone-screen.android .file-meta span { color: var(--android-muted); }
+.phone-screen.android .file-grid { gap: 12px; padding: 2px 0 16px; }
+.phone-screen.android .grid-item { padding: 10px; border: 1px solid var(--android-outline-soft); border-radius: 18px; box-shadow: none; }
+.phone-screen.android .grid-thumb { border-radius: 14px; background: var(--android-outline-soft); }
+.phone-screen.android .grid-meta strong { color: var(--android-ink); font-weight: 600; }
+.phone-screen.android .grid-meta span { color: var(--android-muted); }
+.phone-screen.android .bottom-nav {
+  min-height: 80px;
+  padding: 8px 14px 12px;
+  border-color: var(--android-outline-soft);
+  background: rgba(248,250,252,.96);
+}
+.phone-screen.android .bottom-nav .nav-item { color: var(--android-muted); font-size: 12px; font-weight: 500; }
+.phone-screen.android .bottom-nav .nav-item.active { color: var(--android-primary); background: transparent; }
+.phone-screen.android .bottom-nav .nav-item.active .nav-ico { width: 56px; border-radius: 16px; background: #dbeafe; }
+.phone-screen.android .fab { right: 20px; bottom: 92px; border-radius: 18px; background: var(--android-primary); box-shadow: 0 10px 20px rgba(37,99,235,.28); }
+.phone-screen.android .btn { min-height: 44px; border-radius: 14px; font-weight: 600; }
+.phone-screen.android .btn-primary { background: var(--android-primary); }
+.phone-screen.android .btn-secondary { color: var(--android-primary); border-color: var(--android-outline); background: var(--android-surface); }
+.phone-screen.android .btn-danger { background: #dc2626; }
+.phone-screen.android .field { min-height: 52px; color: var(--android-ink); background: var(--android-surface); border-color: var(--android-outline); border-radius: 16px; }
+.phone-screen.android .field:focus { border-color: var(--android-primary); box-shadow: 0 0 0 2px rgba(37,99,235,.14); }
+.phone-screen.android .field-label { color: var(--android-muted); }
+.phone-screen.android .sheet,
+.phone-screen.android .modal-card { border-color: var(--android-outline-soft); border-radius: 20px; box-shadow: 0 16px 40px rgba(15,23,42,.2); }
+.phone-screen.android .sheet-action { border-radius: 14px; color: var(--android-ink); }
+.phone-screen.android .sheet-action:hover { background: #eff6ff; }
+.phone-screen.android .sheet-action .ico { color: var(--android-primary); background: #dbeafe; }
+.phone-screen.android .alert.info { color: #1d4ed8; background: #dbeafe; border-color: #bfdbfe; }
+.phone-screen.android .alert.success { color: #047857; background: #d1fae5; border-color: #a7f3d0; }
+.phone-screen.android .alert.warning { color: #92400e; background: #fef3c7; border-color: #fde68a; }
+.phone-screen.android .alert.danger { color: #b91c1c; background: #fee2e2; border-color: #fecaca; }
+.phone-screen.android .login-wrap { padding: 24px; }
+.phone-screen.android .brand-badge { width: 64px; height: 64px; border-radius: 16px; font-size: 20px; background: linear-gradient(180deg,#4da3ff,#007aff); box-shadow: 0 8px 16px rgba(0,122,255,.24); }
+.phone-screen.android .brand h1 { color: var(--android-ink); font-size: 28px; font-weight: 700; }
+.phone-screen.android .brand p,
+.phone-screen.android .helper-text { color: var(--android-muted); }
+.phone-screen.android .preview-topbar { background: var(--android-surface); border-bottom: 1px solid var(--android-outline-soft); }
+.phone-screen.android .status-bar.dark { color: var(--android-ink); background: transparent; }
+.phone-screen.android .preview-topbar .subtitle { color: var(--android-muted); }
+.phone-screen.android .preview-topbar .icon-btn { color: var(--android-muted); }
+.phone-screen.android .preview-tabs { padding: 0 16px 12px; background: var(--android-surface); }
+.phone-screen.android .preview-tabs .btn.active { color: var(--android-primary); background: #dbeafe; }
+.phone-screen.android .preview-tabs .btn:not(.active) { color: var(--android-muted); }
+.phone-screen.android .preview-stage { padding: 16px; background: var(--android-background); color: var(--android-ink); }
+.phone-screen.android .preview-stage.light { background: var(--android-background); }
+.phone-screen.android .preview-pdf { border: 1px solid var(--android-outline-soft); border-radius: 20px; box-shadow: none; }
+.phone-screen.android .section-title { color: var(--android-muted); font-size: 13px; font-weight: 600; }
+.phone-screen.android .settings-row { display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 8px 0; border-bottom: 1px solid var(--android-outline-soft); }
+.phone-screen.android .settings-row:last-of-type { border-bottom: 0; }
+.phone-screen.android .settings-row b,
+.phone-screen.android .settings-row small { display: block; }
+.phone-screen.android .settings-row b { color: var(--android-ink); font-size: 14px; font-weight: 600; }
+.phone-screen.android .settings-row small { margin-top: 3px; color: var(--android-muted); font-size: 12px; }
+.phone-screen.android .settings-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 11px; color: var(--android-primary); background: #dbeafe; font-size: 18px; }
+.phone-screen.android .settings-theme-toggle { width: 100%; margin-top: 10px; }
+.phone-screen.android .settings-theme-toggle .view-mode-btn { flex: 1; }
+.phone-screen.android .task-toolbar { display: flex; align-items: center; justify-content: space-between; min-height: 42px; padding: 0 2px 8px; color: var(--android-muted); font-size: 12px; }
+.phone-screen.android .task-toolbar button { min-height: 34px; padding: 0 10px; border: 1px solid var(--android-outline); border-radius: 10px; color: var(--android-primary); background: var(--android-surface); font-size: 12px; font-weight: 600; }
+.phone-screen.android .task-filter { display: flex; gap: 8px; padding-bottom: 12px; }
+.phone-screen.android .task-filter button { min-height: 32px; padding: 0 12px; border: 1px solid var(--android-outline); border-radius: 16px; color: var(--android-muted); background: var(--android-surface); font-size: 12px; }
+.phone-screen.android .task-filter button.active { color: #1d4ed8; border-color: #bfdbfe; background: #dbeafe; font-weight: 600; }
+
+/* ===== Android real-device calibration (RMX6699, 2026-09-20) ===== */
+.phone-screen.android {
+  --android-primary: #60a5fa;
+  --android-secondary: #3bd0a0;
+  --android-surface: #111a2b;
+  --android-background: #0d1628;
+  --android-ink: #e7eefb;
+  --android-muted: #a8b6ce;
+  --android-outline: #30405a;
+  --android-outline-soft: #202d43;
+  background: var(--android-background);
+}
+.phone-screen.android .app-header,
+.phone-screen.android .preview-topbar { background: var(--android-background); border-color: var(--android-outline-soft); }
+.phone-screen.android .app-header h1 { color: var(--android-ink); font-weight: 700; }
+.phone-screen.android .subtitle,
+.phone-screen.android .view-mode-hint { color: var(--android-muted); }
+.phone-screen.android .icon-btn { color: var(--android-muted); }
+.phone-screen.android .icon-btn:hover { color: var(--android-ink); background: rgba(96,165,250,.12); }
+.phone-screen.android .path-chip { color: var(--android-muted); background: #172238; }
+.phone-screen.android .view-mode-toggle { background: transparent; border: 1px solid var(--android-outline); }
+.phone-screen.android .view-mode-btn { color: var(--android-muted); }
+.phone-screen.android .view-mode-btn.active { color: #06231e; background: var(--android-secondary); box-shadow: none; }
+.phone-screen.android .app-content { background: var(--android-background); }
+.phone-screen.android .permission-note,
+.phone-screen.android .progress-card,
+.phone-screen.android .profile-card,
+.phone-screen.android .share-target,
+.phone-screen.android .file-item,
+.phone-screen.android .grid-item { color: var(--android-ink); background: var(--android-surface); border-color: var(--android-outline-soft); }
+.phone-screen.android .permission-note { color: var(--android-muted); }
+.phone-screen.android .file-item:hover,
+.phone-screen.android .file-item.active { border-color: var(--android-primary); }
+.phone-screen.android .file-meta strong,
+.phone-screen.android .grid-meta strong { color: var(--android-ink); }
+.phone-screen.android .file-meta span,
+.phone-screen.android .grid-meta span { color: var(--android-muted); }
+.phone-screen.android .grid-thumb { background: #1c2940; }
+.phone-screen.android .bottom-nav { border-color: transparent; background: var(--android-background); }
+.phone-screen.android .bottom-nav .nav-item { color: var(--android-muted); }
+.phone-screen.android .bottom-nav .nav-item.active { color: var(--android-ink); }
+.phone-screen.android .bottom-nav .nav-item.active .nav-ico { background: var(--android-secondary); }
+.phone-screen.android .fab { color: #061a2f; background: var(--android-primary); box-shadow: none; }
+.phone-screen.android .btn-primary { color: #06231e; background: var(--android-secondary); }
+.phone-screen.android .btn-secondary { color: var(--android-ink); background: transparent; border-color: var(--android-outline); }
+.phone-screen.android .btn-danger { color: #fff; background: #ef6c6c; }
+.phone-screen.android .field { color: var(--android-ink); background: var(--android-surface); border-color: var(--android-outline); }
+.phone-screen.android .field:focus { border-color: var(--android-primary); box-shadow: 0 0 0 2px rgba(96,165,250,.15); }
+.phone-screen.android .sheet,
+.phone-screen.android .modal-card { color: var(--android-ink); background: var(--android-surface); border-color: var(--android-outline); }
+.phone-screen.android .sheet-handle { background: #50617d; }
+.phone-screen.android .sheet-action { color: var(--android-ink); }
+.phone-screen.android .sheet-action:hover { background: #19263b; }
+.phone-screen.android .sheet-action .ico,
+.phone-screen.android .settings-icon { color: var(--android-primary); background: #1c2b45; }
+.phone-screen.android .alert.info { color: #dceaff; background: #1c467e; border-color: #2e609d; }
+.phone-screen.android .alert.success { color: #052d25; background: var(--android-secondary); border-color: var(--android-secondary); }
+.phone-screen.android .alert.warning { color: #fff1c4; background: #5c4417; border-color: #80601f; }
+.phone-screen.android .alert.danger { color: #ffd9d9; background: #632d39; border-color: #8e3d4c; }
+.phone-screen.android .brand h1,
+.phone-screen.android .empty-state h3,
+.phone-screen.android .settings-row b { color: var(--android-ink); }
+.phone-screen.android .brand p,
+.phone-screen.android .helper-text,
+.phone-screen.android .empty-state,
+.phone-screen.android .settings-row small,
+.phone-screen.android .section-title { color: var(--android-muted); }
+.phone-screen.android .empty-state .emoji { background: #1c2940; border-color: var(--android-outline); box-shadow: none; }
+.phone-screen.android .preview-stage,
+.phone-screen.android .preview-stage.light { color: var(--android-ink); background: var(--android-background); }
+.phone-screen.android .preview-pdf { color: var(--android-ink); background: var(--android-surface); border-color: var(--android-outline); }
+.phone-screen.android .preview-pdf p { color: var(--android-muted); }
+.phone-screen.android .status-bar.dark { color: var(--android-ink); }
+.phone-screen.android .task-toolbar { color: var(--android-muted); }
+.phone-screen.android .task-toolbar button,
+.phone-screen.android .task-filter button { color: var(--android-muted); border-color: var(--android-outline); background: transparent; }
+.phone-screen.android .task-filter button.active { color: #06231e; border-color: var(--android-secondary); background: var(--android-secondary); }
+
+/* 真机浅色模式：当前 Android 客户端的默认对照方案。 */
+.phone-screen.android.light-theme {
+  --android-primary: #2563eb;
+  --android-secondary: #0f766e;
+  --android-surface: #ffffff;
+  --android-background: #f1f5f9;
+  --android-ink: #0f172a;
+  --android-muted: #475569;
+  --android-outline: #cbd5e1;
+  --android-outline-soft: #e2e8f0;
+  background: var(--android-background);
+}
+.phone-screen.android.light-theme .app-header,
+.phone-screen.android.light-theme .preview-topbar { background: var(--android-background); border-color: transparent; }
+.phone-screen.android.light-theme .icon-btn { color: #475569; }
+.phone-screen.android.light-theme .path-chip { color: #475569; background: #e2e8f0; }
+.phone-screen.android.light-theme .view-mode-toggle { border-color: #cbd5e1; }
+.phone-screen.android.light-theme .view-mode-btn.active { color: #fff; background: #0f766e; }
+.phone-screen.android.light-theme .app-content,
+.phone-screen.android.light-theme .preview-stage,
+.phone-screen.android.light-theme .preview-stage.light { background: var(--android-background); }
+.phone-screen.android.light-theme .permission-note,
+.phone-screen.android.light-theme .progress-card,
+.phone-screen.android.light-theme .profile-card,
+.phone-screen.android.light-theme .share-target,
+.phone-screen.android.light-theme .file-item,
+.phone-screen.android.light-theme .grid-item,
+.phone-screen.android.light-theme .preview-pdf { color: var(--android-ink); background: #fff; border-color: #e2e8f0; }
+.phone-screen.android.light-theme .grid-thumb,
+.phone-screen.android.light-theme .empty-state .emoji { background: #eaf0f8; border-color: #e2e8f0; }
+.phone-screen.android.light-theme .bottom-nav { background: var(--android-background); }
+.phone-screen.android.light-theme .bottom-nav .nav-item.active { color: var(--android-ink); }
+.phone-screen.android.light-theme .bottom-nav .nav-item.active .nav-ico { background: #0f766e; color: #fff; }
+.phone-screen.android.light-theme .fab { color: #fff; background: #2563eb; box-shadow: 0 10px 20px rgba(37,99,235,.28); }
+.phone-screen.android.light-theme .btn-primary { color: #fff; background: #0f766e; }
+.phone-screen.android.light-theme .btn-secondary { color: #475569; background: #fff; border-color: #cbd5e1; }
+.phone-screen.android.light-theme .sheet,
+.phone-screen.android.light-theme .modal-card { color: var(--android-ink); background: #fff; border-color: #e2e8f0; }
+.phone-screen.android.light-theme .sheet-action { color: var(--android-ink); }
+.phone-screen.android.light-theme .sheet-action .ico,
+.phone-screen.android.light-theme .settings-icon { color: #2563eb; background: #e8f0fe; }
+.phone-screen.android.light-theme .alert.info { color: #1d4ed8; background: #dbeafe; border-color: #bfdbfe; }
+.phone-screen.android.light-theme .alert.success { color: #065f46; background: #d1fae5; border-color: #a7f3d0; }
+.phone-screen.android.light-theme .alert.warning { color: #92400e; background: #fef3c7; border-color: #fde68a; }
+.phone-screen.android.light-theme .alert.danger { color: #b91c1c; background: #fee2e2; border-color: #fecaca; }
+.phone-screen.android.light-theme .brand h1,
+.phone-screen.android.light-theme .empty-state h3,
+.phone-screen.android.light-theme .settings-row b { color: var(--android-ink); }
+.phone-screen.android.light-theme .brand p,
+.phone-screen.android.light-theme .helper-text,
+.phone-screen.android.light-theme .empty-state,
+.phone-screen.android.light-theme .settings-row small,
+.phone-screen.android.light-theme .section-title { color: var(--android-muted); }
+.phone-screen.android.light-theme .task-toolbar button,
+.phone-screen.android.light-theme .task-filter button { color: #475569; border-color: #cbd5e1; background: #fff; }
+.phone-screen.android.light-theme .task-filter button.active { color: #fff; border-color: #0f766e; background: #0f766e; }
+.prototype-theme-switch { display: inline-flex; overflow: hidden; border: 1px solid #cbd5e1; border-radius: 9px; background: #fff; }
+.prototype-theme-switch button { min-height: 32px; padding: 0 9px; color: #475569; font-size: 12px; }
+.prototype-theme-switch button.active { color: #fff; background: #0f766e; }
