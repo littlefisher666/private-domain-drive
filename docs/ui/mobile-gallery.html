@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>相册式浏览 · 私域网盘</title>
+  <link rel="stylesheet" href="./css/prototype.css" />
+  <style>
+    .gallery-prototype { --gallery-accent: #2563eb; background: #f1f5f9; color: #0f172a; }
+    .gallery-prototype .gallery-top { padding: 5px 16px 12px; background: #f1f5f9; }
+    .gallery-prototype .gallery-title-row { display: flex; align-items: center; justify-content: space-between; min-height: 50px; }
+    .gallery-prototype h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -.02em; }
+    .gallery-prototype .gallery-title-row p { margin: 3px 0 0; color: #64748b; font-size: 12px; }
+    .gallery-prototype .more-button, .gallery-prototype .search-button { width: 42px; height: 42px; border-radius: 50%; color: #444746; font-size: 23px; line-height: 1; }
+    .gallery-prototype .more-button:active, .gallery-prototype .search-button:active { background: #e7e7e9; }
+    .gallery-prototype .gallery-path { display: flex; align-items: center; min-height: 44px; margin: 4px 0 10px; padding: 0 14px; border-radius: 24px; color: #475569; background: #e2e8f0; font-size: 13px; }
+    .gallery-prototype .gallery-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; padding: 3px; border-radius: 9px; background: #e8edf4; }
+    .gallery-prototype .gallery-tab { min-height: 32px; border-radius: 7px; color: #64748b; font-size: 12px; font-weight: 500; }
+    .gallery-prototype .gallery-tab.active { color: #0b57d0; background: #fff; box-shadow: 0 1px 2px rgba(60,64,67,.18); }
+    .gallery-prototype .gallery-scroll { flex: 1; overflow: auto; padding: 4px 16px 92px; scrollbar-width: none; }
+    .gallery-prototype .gallery-scroll::-webkit-scrollbar { display: none; }
+    .gallery-prototype .gallery-summary { display: flex; justify-content: space-between; align-items: center; padding: 12px 4px 10px; color: #5f6368; font-size: 12px; }
+    .gallery-prototype .gallery-summary strong { color: #1c1b1f; font-size: 13px; font-weight: 500; }
+    .gallery-prototype .day-title { margin: 12px 4px 8px; color: #1c1b1f; font-size: 16px; font-weight: 500; }
+    .gallery-prototype .day-subtitle { margin-left: 6px; color: #77767b; font-size: 12px; font-weight: 400; }
+    .gallery-prototype .photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .gallery-prototype .photo-tile { position: relative; aspect-ratio: .83; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 16px; background: #d8dce3; box-shadow: 0 1px 2px rgba(15,23,42,.08); cursor: pointer; }
+    .gallery-prototype .photo-tile img { width: 100%; height: 100%; object-fit: cover; transition: transform .2s ease; }
+    .gallery-prototype .photo-tile:active img { transform: scale(1.05); }
+    .gallery-prototype .photo-tile .video-mark { position: absolute; right: 7px; bottom: 6px; padding: 3px 5px; border-radius: 5px; color: white; background: rgba(0, 0, 0, .58); font-size: 10px; }
+    .gallery-prototype .album-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px 4px; }
+    .gallery-prototype .album-card { overflow: hidden; border-radius: 15px; background: #fff; box-shadow: 0 1px 3px rgba(31,31,31,.1); cursor: pointer; }
+    .gallery-prototype .album-cover { height: 112px; background-size: cover; background-position: center; }
+    .gallery-prototype .album-card strong, .gallery-prototype .album-card span { display: block; padding: 0 12px; }
+    .gallery-prototype .album-card strong { padding-top: 10px; font-size: 14px; font-weight: 500; }
+    .gallery-prototype .album-card span { padding-top: 3px; padding-bottom: 12px; color: #77767b; font-size: 12px; }
+    .gallery-prototype .gallery-nav { position: absolute; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(3, 1fr); min-height: 68px; padding: 6px 8px 10px; border-top: 1px solid #e2e8f0; background: rgba(255,255,255,.96); }
+    .gallery-prototype .gallery-nav button { display: grid; place-content: center; gap: 3px; color: #747378; font-size: 11px; }
+    .gallery-prototype .gallery-nav .nav-symbol { font-size: 19px; line-height: 18px; }
+    .gallery-prototype .gallery-nav button.active { color: var(--gallery-accent); font-weight: 500; }
+    .gallery-prototype .gallery-nav button.active .nav-symbol { display: grid; place-items: center; width: 48px; height: 28px; border-radius: 18px; background: #dbeafe; }
+    .gallery-prototype .upload-fab { position: absolute; right: 20px; bottom: 82px; width: 54px; height: 54px; border-radius: 17px; color: #fff; background: var(--gallery-accent); box-shadow: 0 5px 14px rgba(63,81,181,.38); font-size: 25px; }
+    .gallery-prototype .selection-bar { position: absolute; inset: 0 0 auto; z-index: 3; display: none; align-items: center; justify-content: space-between; min-height: 76px; padding: 28px 12px 8px; background: #f8f8fa; }
+    .gallery-prototype.selecting .selection-bar { display: flex; }
+    .gallery-prototype.selecting .gallery-top { visibility: hidden; }
+    .gallery-prototype .selection-bar strong { font-size: 17px; font-weight: 500; }
+    .gallery-prototype .selection-actions { display: flex; gap: 2px; }
+    .gallery-prototype .selection-actions button { min-width: 44px; min-height: 40px; color: var(--gallery-accent); font-size: 20px; }
+    .gallery-prototype .select-mark { position: absolute; top: 7px; right: 7px; z-index: 1; width: 23px; height: 23px; border: 2px solid #fff; border-radius: 50%; background: rgba(0,0,0,.26); }
+    .gallery-prototype .photo-tile.selected .select-mark { border-color: var(--gallery-accent); background: var(--gallery-accent); }
+    .gallery-prototype .photo-tile.selected .select-mark::after { content: '✓'; position: absolute; inset: 0; color: #fff; font-size: 14px; text-align: center; line-height: 19px; }
+    .gallery-prototype .photo-tile:not(.selected) .select-mark { display: none; }
+    .gallery-prototype.selecting .photo-tile:not(.selected) .select-mark { display: block; }
+    .gallery-prototype .preview-overlay { position: absolute; inset: 0; z-index: 5; display: none; flex-direction: column; background: #101114; color: white; }
+    .gallery-prototype.previewing .preview-overlay { display: flex; }
+    .gallery-prototype .preview-head { display: flex; justify-content: space-between; align-items: center; padding: 24px 12px 10px; }
+    .gallery-prototype .preview-head button { min-width: 42px; min-height: 42px; color: #fff; font-size: 25px; }
+    .gallery-prototype .preview-image { flex: 1; display: grid; place-items: center; padding: 10px; }
+    .gallery-prototype .preview-image img { width: 100%; max-height: 480px; object-fit: contain; }
+    .gallery-prototype .preview-foot { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px 22px; }
+    .gallery-prototype .preview-foot small { color: #c9c6cc; }
+    .gallery-prototype .preview-foot button { min-width: 42px; min-height: 42px; color: #fff; font-size: 21px; }
+    .gallery-prototype .toast-message { position: absolute; right: 20px; bottom: 92px; left: 20px; z-index: 6; display: none; padding: 12px 16px; border-radius: 10px; color: #fff; background: #303035; box-shadow: 0 4px 12px rgba(0,0,0,.25); font-size: 13px; }
+    .gallery-prototype .toast-message.show { display: block; }
+    .gallery-prototype .upload-sheet { position: absolute; inset: 0; z-index: 4; display: none; align-items: end; padding: 12px; background: rgba(15,23,42,.34); }
+    .gallery-prototype.uploading .upload-sheet { display: flex; }
+    .gallery-prototype .upload-sheet-card { width: 100%; padding: 8px 10px 12px; border: 1px solid #e2e8f0; border-radius: 22px; background: #fff; box-shadow: 0 18px 44px rgba(15,23,42,.22); }
+    .gallery-prototype .upload-handle { width: 38px; height: 4px; margin: 2px auto 8px; border-radius: 3px; background: #cbd5e1; }
+    .gallery-prototype .upload-option { display: flex; align-items: center; width: 100%; min-height: 52px; gap: 14px; padding: 8px 10px; border-radius: 12px; color: #0f172a; font-size: 14px; text-align: left; }
+    .gallery-prototype .upload-option:hover { background: #f1f5f9; }
+    .gallery-prototype .upload-option b { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; color: #2563eb; background: #dbeafe; font-size: 18px; }
+    .gallery-prototype .sheet-cancel { width: 100%; min-height: 42px; margin-top: 6px; border-radius: 12px; color: #2563eb; background: #eff6ff; font-weight: 600; }
+
+    /* 与真机当前深色主题一致：深蓝画布、薄荷绿选中态、浅蓝主操作。 */
+    .gallery-prototype { --gallery-accent: #60a5fa; background: #0d1628; color: #e7eefb; }
+    .gallery-prototype .gallery-top { background: #0d1628; }
+    .gallery-prototype h1 { color: #e7eefb; }
+    .gallery-prototype .gallery-title-row p,
+    .gallery-prototype .gallery-summary,
+    .gallery-prototype .day-subtitle { color: #a8b6ce; }
+    .gallery-prototype .more-button, .gallery-prototype .search-button { color: #a8b6ce; }
+    .gallery-prototype .gallery-path { color: #a8b6ce; background: #172238; }
+    .gallery-prototype .gallery-tabs { border: 1px solid #30405a; background: transparent; }
+    .gallery-prototype .gallery-tab { color: #a8b6ce; }
+    .gallery-prototype .gallery-tab.active { color: #06231e; background: #3bd0a0; box-shadow: none; }
+    .gallery-prototype .gallery-scroll { background: #0d1628; }
+    .gallery-prototype .gallery-summary strong, .gallery-prototype .day-title { color: #e7eefb; }
+    .gallery-prototype .photo-tile, .gallery-prototype .album-card { border-color: #202d43; background: #111a2b; box-shadow: none; }
+    .gallery-prototype .album-card strong { color: #e7eefb; }
+    .gallery-prototype .album-card span { color: #a8b6ce; }
+    .gallery-prototype .gallery-nav { border-color: transparent; background: #0d1628; }
+    .gallery-prototype .gallery-nav button { color: #a8b6ce; }
+    .gallery-prototype .gallery-nav button.active { color: #e7eefb; }
+    .gallery-prototype .gallery-nav button.active .nav-symbol { background: #3bd0a0; color: #06231e; }
+    .gallery-prototype .upload-fab { color: #061a2f; background: #60a5fa; box-shadow: none; }
+    .gallery-prototype .selection-bar { background: #0d1628; color: #e7eefb; }
+    .gallery-prototype .selection-actions button { color: #60a5fa; }
+    .gallery-prototype .photo-tile.selected .select-mark { border-color: #3bd0a0; background: #3bd0a0; }
+    .gallery-prototype .upload-sheet { background: rgba(0,0,0,.6); }
+    .gallery-prototype .upload-sheet-card { border-color: #30405a; background: #111a2b; }
+    .gallery-prototype .upload-option { color: #e7eefb; }
+    .gallery-prototype .upload-option:hover { background: #172238; }
+    .gallery-prototype .upload-option b { color: #60a5fa; background: #1c2b45; }
+    .gallery-prototype .sheet-cancel { color: #e7eefb; background: transparent; border: 1px solid #30405a; }
+    .gallery-prototype.light-theme { --gallery-accent: #2563eb; background: #f1f5f9; color: #0f172a; }
+    .gallery-prototype.light-theme .gallery-top,
+    .gallery-prototype.light-theme .gallery-scroll,
+    .gallery-prototype.light-theme .gallery-nav,
+    .gallery-prototype.light-theme .selection-bar { background: #f1f5f9; }
+    .gallery-prototype.light-theme h1,
+    .gallery-prototype.light-theme .gallery-summary strong,
+    .gallery-prototype.light-theme .day-title,
+    .gallery-prototype.light-theme .album-card strong { color: #0f172a; }
+    .gallery-prototype.light-theme .gallery-title-row p,
+    .gallery-prototype.light-theme .gallery-summary,
+    .gallery-prototype.light-theme .day-subtitle,
+    .gallery-prototype.light-theme .album-card span,
+    .gallery-prototype.light-theme .gallery-nav button { color: #475569; }
+    .gallery-prototype.light-theme .more-button,
+    .gallery-prototype.light-theme .search-button { color: #475569; }
+    .gallery-prototype.light-theme .gallery-path { color: #475569; background: #e2e8f0; }
+    .gallery-prototype.light-theme .gallery-tabs { border-color: #cbd5e1; }
+    .gallery-prototype.light-theme .gallery-tab { color: #475569; }
+    .gallery-prototype.light-theme .gallery-tab.active { color: #fff; background: #0f766e; }
+    .gallery-prototype.light-theme .photo-tile,
+    .gallery-prototype.light-theme .album-card { border-color: #e2e8f0; background: #fff; }
+    .gallery-prototype.light-theme .gallery-nav button.active { color: #0f172a; }
+    .gallery-prototype.light-theme .gallery-nav button.active .nav-symbol { color: #fff; background: #0f766e; }
+    .gallery-prototype.light-theme .upload-fab { color: #fff; background: #2563eb; box-shadow: 0 10px 20px rgba(37,99,235,.28); }
+    .gallery-prototype.light-theme .selection-actions button { color: #2563eb; }
+    .gallery-prototype.light-theme .upload-sheet-card { border-color: #e2e8f0; background: #fff; }
+    .gallery-prototype.light-theme .upload-option { color: #0f172a; }
+    .gallery-prototype.light-theme .upload-option b { color: #2563eb; background: #e8f0fe; }
+    .gallery-prototype.light-theme .sheet-cancel { color: #475569; background: #fff; border-color: #cbd5e1; }
+  </style>
+</head>
+<body>
+  <div class="device-page">
+    <div>
+      <div class="device-toolbar">
+        <div class="left"><a class="btn btn-secondary" href="./index.html">返回目录</a></div>
+        <div class="right"><span class="label">Android · 相册式探索</span><div class="prototype-theme-switch" aria-label="原型主题"><button class="active" type="button" data-gallery-theme="light">浅色</button><button type="button" data-gallery-theme="dark">深色</button></div></div>
+      </div>
+      <div class="phone-shell">
+        <main class="phone-screen android gallery-prototype light-theme" id="gallery-prototype" aria-label="相册式文件浏览原型">
+          <div class="status-bar"><span>09:41</span><span>5G ▮▮▮</span></div>
+          <header class="gallery-top">
+            <div class="gallery-title-row">
+              <div><h1>共享空间</h1><p>当前身份 family.admin</p></div>
+              <div><button class="search-button" type="button" aria-label="刷新">↻</button><button class="more-button" type="button" aria-label="排序">⋮</button></div>
+            </div>
+            <div class="gallery-path">⌂&nbsp;&nbsp;共享空间 / 照片</div>
+            <nav class="gallery-tabs" aria-label="浏览方式">
+              <button class="gallery-tab" type="button" data-tab="folders">列表</button>
+              <button class="gallery-tab active" type="button" data-tab="photos">缩略图</button>
+              <button class="gallery-tab" type="button" data-tab="albums">相册</button>
+            </nav>
+          </header>
+          <section class="gallery-scroll" id="gallery-content">
+            <div class="gallery-summary"><strong>照片 · 20 项</strong><span>按更新时间 ▾</span></div>
+            <div class="gallery-view" data-view="photos">
+              <h2 class="day-title">今天 <span class="day-subtitle">12 张照片 · 1 段视频</span></h2>
+              <div class="photo-grid">
+                <button class="photo-tile" data-photo="0" type="button"><img alt="湖畔山景" src="https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&amp;fit=crop&amp;w=420&amp;q=80"><span class="select-mark"></span></button>
+                <button class="photo-tile" data-photo="1" type="button"><img alt="餐桌上的早餐" src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&amp;fit=crop&amp;w=420&amp;q=80"><span class="select-mark"></span></button>
+                <button class="photo-tile" data-photo="2" type="button"><img alt="海边日落" src="https://images.unsplash.com/photo-1476673160081-cf065607f449?auto=format&amp;fit=crop&amp;w=420&amp;q=80"><span class="select-mark"></span><span class="video-mark">▶ 0:18</span></button>
+                <button class="photo-tile" data-photo="3" type="button"><img alt="山间小屋" src="https://images.unsplash.com/photo-1510798831971-661eb04b3739?auto=format&amp;fit=crop&amp;w=420&amp;q=80"><span class="select-mark"></span></button>
+                <button class="photo-tile" data-photo="4" type="button"><img alt="森林小径" src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&amp;fit=crop&amp;w=420&amp;q=80"><span class="select-mark"></span></button>
+                <button class="photo-tile" data-photo="5" type="button"><img alt="城市夜景" src="https://images.unsplash.com/photo-1519608487953-e999c86e7450?auto=format&amp;fit=crop&amp;w=420&amp;q=80"><span class="select-mark"></span></button>
+              </div>
+              <h2 class="day-title">昨天 <span class="day-subtitle">8 张照片</span></h2>
+              <div class="photo-grid">
+                <button class="photo-tile" data-photo="6" type="button"><img alt="海岸礁石" src="https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&amp;fit=crop&amp;w=420&amp;q=80"><span class="select-mark"></span></button>
+                <button class="photo-tile" data-photo="7" type="button"><img alt="高山云雾" src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&amp;fit=crop&amp;w=420&amp;q=80"><span class="select-mark"></span></button>
+                <button class="photo-tile" data-photo="8" type="button"><img alt="郊野黄昏" src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&amp;fit=crop&amp;w=420&amp;q=80"><span class="select-mark"></span></button>
+              </div>
+            </div>
+            <div class="gallery-view" data-view="albums" hidden>
+              <h2 class="day-title">相册</h2>
+              <div class="album-grid">
+                <button class="album-card" type="button"><div class="album-cover" style="background-image:url('https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&amp;fit=crop&amp;w=500&amp;q=80')"></div><strong>2026 秋游</strong><span>86 项</span></button>
+                <button class="album-card" type="button"><div class="album-cover" style="background-image:url('https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&amp;fit=crop&amp;w=500&amp;q=80')"></div><strong>家庭日常</strong><span>214 项</span></button>
+                <button class="album-card" type="button"><div class="album-cover" style="background-image:url('https://images.unsplash.com/photo-1476673160081-cf065607f449?auto=format&amp;fit=crop&amp;w=500&amp;q=80')"></div><strong>海边假期</strong><span>42 项</span></button>
+                <button class="album-card" type="button"><div class="album-cover" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&amp;fit=crop&amp;w=500&amp;q=80')"></div><strong>壁纸收藏</strong><span>126 项</span></button>
+              </div>
+            </div>
+            <div class="gallery-view" data-view="folders" hidden>
+              <h2 class="day-title">共享空间 / 照片</h2>
+              <div class="album-grid">
+                <button class="album-card" type="button"><div class="album-cover" style="background-image:linear-gradient(135deg,#ffc766,#e49a2c)"></div><strong>照片</strong><span>356 项 · 8.4 GB</span></button>
+                <button class="album-card" type="button"><div class="album-cover" style="background-image:linear-gradient(135deg,#95c9ff,#407ad7)"></div><strong>家庭视频</strong><span>78 项 · 26.1 GB</span></button>
+                <button class="album-card" type="button"><div class="album-cover" style="background-image:linear-gradient(135deg,#b8e7c9,#45a66b)"></div><strong>旅行记录</strong><span>121 项 · 6.2 GB</span></button>
+                <button class="album-card" type="button"><div class="album-cover" style="background-image:linear-gradient(135deg,#e2c7ff,#8e63cc)"></div><strong>来自设备</strong><span>最近上传 14 项</span></button>
+              </div>
+            </div>
+          </section>
+          <button class="upload-fab" type="button" aria-label="上传照片">＋</button>
+          <nav class="gallery-nav" aria-label="主导航">
+            <button class="active" type="button"><span class="nav-symbol">▣</span><span>文件</span></button>
+            <button type="button"><span class="nav-symbol">⇅</span><span>传输</span></button>
+            <button type="button"><span class="nav-symbol">☺</span><span>我的</span></button>
+          </nav>
+          <div class="selection-bar"><button id="cancel-selection" type="button" aria-label="取消选择">‹</button><strong><span id="selection-count">0</span> 已选择</strong><div class="selection-actions"><button type="button" data-action="下载" aria-label="下载">⇩</button><button type="button" data-action="删除" aria-label="删除">⌫</button></div></div>
+          <section class="preview-overlay" aria-label="图片预览"><div class="preview-head"><button id="close-preview" type="button" aria-label="关闭预览">‹</button><span>今天 · 09:12</span><button type="button" aria-label="更多">⋮</button></div><div class="preview-image"><img id="preview-photo" alt="预览图片"></div><div class="preview-foot"><small id="preview-caption">家庭相册</small><div><button type="button" aria-label="收藏">♡</button><button type="button" aria-label="分享">⇧</button><button type="button" aria-label="删除">⌫</button></div></div></section>
+          <section class="upload-sheet" aria-label="上传操作"><div class="upload-sheet-card"><div class="upload-handle"></div><button class="upload-option" type="button" data-upload="上传文件"><b>⇧</b><span>上传文件</span></button><button class="upload-option" type="button" data-upload="上传文件夹"><b>▤</b><span>上传文件夹</span></button><button class="upload-option" type="button" data-upload="从相册上传"><b>▣</b><span>从相册上传</span></button><button class="upload-option" type="button" data-upload="新建文件夹"><b>＋</b><span>新建文件夹</span></button><button class="sheet-cancel" id="cancel-upload" type="button">取消</button></div></section>
+          <div class="toast-message" id="toast-message" aria-live="polite"></div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const root = document.getElementById('gallery-prototype');
+      const toast = document.getElementById('toast-message');
+      let toastTimer;
+      const savedTheme = new URLSearchParams(location.search).get('theme') || sessionStorage.getItem('pdd-prototype-theme') || 'light';
+      const applyTheme = (theme) => {
+        const light = theme !== 'dark';
+        root.classList.toggle('light-theme', light);
+        sessionStorage.setItem('pdd-prototype-theme', light ? 'light' : 'dark');
+        document.querySelectorAll('[data-gallery-theme]').forEach((button) => button.classList.toggle('active', button.dataset.galleryTheme === (light ? 'light' : 'dark')));
+      };
+      document.querySelectorAll('[data-gallery-theme]').forEach((button) => button.addEventListener('click', () => applyTheme(button.dataset.galleryTheme)));
+      applyTheme(savedTheme);
+      const showToast = (message) => { toast.textContent = message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 1800); };
+      document.querySelectorAll('.gallery-tab').forEach((tab) => tab.addEventListener('click', () => {
+        document.querySelectorAll('.gallery-tab').forEach((item) => item.classList.toggle('active', item === tab));
+        document.querySelectorAll('.gallery-view').forEach((view) => { view.hidden = view.dataset.view !== tab.dataset.tab; });
+      }));
+      document.querySelectorAll('.photo-tile').forEach((tile) => tile.addEventListener('click', () => {
+        if (tile.dataset.justSelected === 'true') { delete tile.dataset.justSelected; return; }
+        if (root.classList.contains('selecting')) {
+          tile.classList.toggle('selected');
+          document.getElementById('selection-count').textContent = document.querySelectorAll('.photo-tile.selected').length;
+          return;
+        }
+        document.getElementById('preview-photo').src = tile.querySelector('img').src;
+        document.getElementById('preview-caption').textContent = tile.querySelector('img').alt;
+        root.classList.add('previewing');
+      }));
+      const beginSelection = (tile) => { root.classList.add('selecting'); tile.classList.add('selected'); tile.dataset.justSelected = 'true'; document.getElementById('selection-count').textContent = String(document.querySelectorAll('.photo-tile.selected').length); };
+      document.querySelectorAll('.photo-tile').forEach((tile) => {
+        let holdTimer;
+        tile.addEventListener('contextmenu', (event) => { event.preventDefault(); beginSelection(tile); });
+        tile.addEventListener('pointerdown', () => { if (!root.classList.contains('selecting')) holdTimer = setTimeout(() => beginSelection(tile), 500); });
+        ['pointerup', 'pointerleave', 'pointercancel'].forEach((event) => tile.addEventListener(event, () => clearTimeout(holdTimer)));
+      });
+      document.getElementById('cancel-selection').addEventListener('click', () => { root.classList.remove('selecting'); document.querySelectorAll('.photo-tile.selected').forEach((tile) => tile.classList.remove('selected')); });
+      document.getElementById('close-preview').addEventListener('click', () => root.classList.remove('previewing'));
+      document.querySelector('.upload-fab').addEventListener('click', () => root.classList.add('uploading'));
+      document.getElementById('cancel-upload').addEventListener('click', () => root.classList.remove('uploading'));
+      document.querySelectorAll('[data-upload]').forEach((button) => button.addEventListener('click', () => { root.classList.remove('uploading'); showToast(`已打开“${button.dataset.upload}”流程`); }));
+      document.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', () => showToast(`已准备${button.dataset.action}所选项目`)));
+      document.querySelector('.search-button').addEventListener('click', () => showToast('已刷新当前目录'));
+      document.querySelector('.more-button').addEventListener('click', () => showToast('可按名称、更新时间或大小排序'));
+    })();
+  </script>
+</body>
+</html>
