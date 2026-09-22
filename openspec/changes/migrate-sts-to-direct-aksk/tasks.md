@@ -62,4 +62,4 @@
 - [x] 9.1 服务端与客户端同批发布（bootstrap 响应 BREAKING）
 - [x] 9.2 预发环境联调通过后再上线（STS 角色已删除，无法回滚到 STS）
 - [x] 9.3 配置 server 仓库 8 个 GitHub Secrets 与 client 仓库 `FC_*` Secrets/`FC_BASE_URL` 变量
-- [ ] 9.4 上线后删除临时密钥清单文件（`docs/ram用户.csv`、`github_secrets.csv`）
+- [x] 9.4 上线后删除临时密钥清单文件（`docs/ram用户.csv`、`github_secrets.csv`）
