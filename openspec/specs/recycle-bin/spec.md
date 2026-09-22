@@ -1,5 +1,8 @@
-## ADDED Requirements
+# recycle-bin Specification
 
+## Purpose
+TBD - created by archiving change add-recycle-bin. Update Purpose after archive.
+## Requirements
 ### Requirement: 删除内容移入回收站
 系统 SHALL 将有删除权限用户发起的文件、文件夹或批量删除作为软删除处理。系统 MUST 先将每个源对象复制到 `shared/.trash/` 下的回收批次，再删除已成功复制的源对象；复制失败的源对象 MUST 保持可见且不得删除。
 
@@ -21,3 +24,14 @@
 #### Scenario: 恢复路径冲突
 - **WHEN** 用户恢复时原路径已有对象
 - **THEN** 系统使用不冲突的“已还原”名称恢复，且不得覆盖现有对象
+
+### Requirement: 用户可以立即删除回收内容
+系统 SHALL 允许用户在回收站中对回收批次执行立即删除，删除前 MUST 二次确认不可恢复，并删除该批次下全部对象（manifest 与 payload），不必等待生命周期规则自动清理。
+
+#### Scenario: 立即删除回收批次
+- **WHEN** 用户确认立即删除一个回收批次
+- **THEN** 系统删除该批次的 manifest 与全部 payload 对象，并从回收站列表移除
+
+#### Scenario: 立即删除部分失败
+- **WHEN** 批次内部分对象删除失败
+- **THEN** 系统向用户报告失败，批次保留在回收站中等待重试或自动清理
