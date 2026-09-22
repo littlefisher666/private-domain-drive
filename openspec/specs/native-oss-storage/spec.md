@@ -1,6 +1,6 @@
 ## Purpose
 
-定义 Android 与 macOS 客户端通过阿里云官方 OSS SDK 执行对象存储操作时的平台桥接、STS 会话、文件路径边界和统一错误契约。
+定义 Android 与 macOS 客户端通过阿里云官方 OSS SDK 执行对象存储操作时的平台桥接、登录下发凭证会话、文件路径边界和统一错误契约。
 
 ## Requirements
 
@@ -34,20 +34,20 @@
 - **WHEN** Android 与 macOS 对相同 OSS 配置和对象执行同类操作
 - **THEN** Flutter 获得字段、状态和错误语义一致的结果
 
-### Requirement: OSS 操作使用 STS 临时凭证
-系统 SHALL 将 FC 下发的 Endpoint、Region、Bucket 和 STS 临时凭证原子配置到原生 OSS 桥接层。原生层 MUST NOT 持久化 AccessKeySecret 或 SecurityToken，退出登录时 MUST 清除凭证及 SDK 客户端状态。
+### Requirement: OSS 操作使用登录下发的访问密钥
+系统 SHALL 将服务端登录时下发的 Endpoint、Region、Bucket、RootPrefix 和 pdd-client 长期 AccessKey（AccessKeyId/AccessKeySecret）原子配置到原生 OSS 桥接层。原生层 MUST NOT 持久化 AccessKeySecret，MUST NOT 依赖 SecurityToken 或凭证刷新，退出登录时 MUST 清除凭证及 SDK 客户端状态。
 
 #### Scenario: 有效会话配置原生 SDK
-- **WHEN** 用户登录、恢复会话或刷新 STS 成功
-- **THEN** Flutter 将最新 OSS 配置和临时凭证更新到当前平台适配器，后续请求使用该配置
+- **WHEN** 用户登录成功并从服务端获取 OSS 连接信息与访问密钥
+- **THEN** Flutter 将该配置和长期 AccessKey 更新到当前平台适配器，后续请求使用该配置
 
 #### Scenario: 用户退出登录
 - **WHEN** 用户退出登录或会话被清除
-- **THEN** 原生适配器清除临时凭证、SDK 客户端及运行中请求引用
+- **THEN** 原生适配器清除访问密钥、SDK 客户端及运行中请求引用
 
 #### Scenario: 凭证失效
-- **WHEN** SDK因临时凭证过期拒绝 OSS 请求
-- **THEN** 原生层返回统一凭证失效错误，由 Flutter 刷新凭证后按任务重试规则重新发起
+- **WHEN** SDK 因访问密钥被撤销或权限不足拒绝 OSS 请求
+- **THEN** 原生层返回统一鉴权失败错误，由 Flutter 引导用户重新登录获取新密钥，而非自动刷新临时凭证
 
 ### Requirement: 大文件传输使用本地文件路径
 上传和下载 SHALL 以本地文件路径作为 Flutter 与原生 SDK之间的文件内容边界。系统 MUST NOT 在上传前将完整大文件读取为 Dart `List<int>`，也 MUST NOT 通过平台通道传递完整大文件内容。
@@ -77,4 +77,4 @@
 
 #### Scenario: 日志涉及鉴权数据
 - **WHEN** 系统记录 SDK请求或错误诊断信息
-- **THEN** 日志不得包含完整 AccessKeySecret 或 SecurityToken
+- **THEN** 日志不得包含完整 AccessKeySecret 或任何长期访问密钥秘密
