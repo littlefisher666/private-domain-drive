@@ -187,7 +187,7 @@ lib/
 | `workspace` | US-02 / US-03 / US-08 / US-09 / US-10 / US-16 / 功能 2.2、2.6 | 目录浏览、CRUD、列表/缩略图、能力驱动 UI | P0 |
 | `transfer` | US-04 / US-05 / US-06 / US-12 / 功能 2.3、2.4、2.7 | 上传下载任务、进度、重试、取消 | P0/P1 |
 | `preview` | US-07 / 功能 2.5 | 图片、PDF、文本预览 | P0 |
-| `share_import` | US-11 / 功能 2.8 | Android 系统分享接收与确认上传 | P0 |
+| `share_import` | US-11 / 功能 2.8 | Android 系统分享接收与目录选择上传 | P0 |
 | `settings` | US-14 / US-15 | 账号信息、能力展示、关于/退出登录 | P1 |
 
 说明：
@@ -471,7 +471,8 @@ sequenceDiagram
 | `/preview` | PreviewPage | 预览 |
 | `/transfers` | TransferTasksPage | 传输中心 |
 | `/settings` | SettingsPage | 我的/设置 |
-| `/share-confirm` | ShareConfirmPage | Android 分享确认（建议新增） |
+
+Android 分享导入不使用独立路由页面，由根组件在分享事件到达后直接弹出 `ShareTargetDialog` 目录选择弹窗，确认后立即创建上传任务。
 
 ### 6.2 平台导航骨架
 
