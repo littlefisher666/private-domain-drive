@@ -33,10 +33,12 @@
 - 拦截状态直接由 `currentPath` 派生，`AppScope` 的 `InheritedNotifier` 保证 `canPop` 在每次目录切换后随重建刷新，与标题栏「返回上级」按钮的可用状态天然一致
 - 备选的页面内部维护历史栈方案需要处理侧边栏跳转、分享导入落盘路径等所有入口的入栈时机，复杂度高且易与桌面端不一致，不采用
 
-### Decision 3：拦截放在 `WorkspacePage` 层而非 `HomeShell` 层
+### Decision 3：拦截放在 `HomeShell` 移动端 `Scaffold` 层而非 `WorkspacePage` 内部
 
-- 只有目录浏览页需要目录级后退语义；传输、回收站、我的等 tab 无层级概念，后退退出应用是合理默认
-- 放在 `WorkspacePage` 内部使该行为随组件自包含，不影响其他 tab
+- `WorkspacePage` 处于 `IndexedStack` 中，其内部的 `PopScope` 即使在非「文件」tab 时也仍注册在当前 `ModalRoute` 上：当「文件」位于根目录（`canPop=true`）时，在回收站等其他 tab 按后退会直接放行退出应用；当「文件」处于子目录时，后退会在后台静默切换目录，行为不可预期
+- 将唯一一处 `PopScope` 上移到 `HomeShell` 移动端分支：`canPop = _index == 0 && currentPath == rootPrefix`，`onPopInvokedWithResult` 中按「非「文件」tab 先切回「文件」→「文件」tab 内非根目录 `setCurrentPath(parentPath)` → 根目录放行」的顺序处理，一次性覆盖所有 tab
+- 目录切换复用 `AppController.setCurrentPath`，`WorkspacePage` 经 `AppScope`（`InheritedNotifier`）重建时在 build 中调用 `_syncDirectoryBinding` 自动重新加载列表，与页内 `_goUp()` 行为一致
+- 传输、回收站、我的等 tab 无目录层级概念，后退统一先回「文件」符合 Android「后退逐级回退到首页再退出」的惯例
 
 ## Risks / Trade-offs
 
@@ -50,4 +52,4 @@
 
 ## Open Questions
 
-（无 —— 已真机验证通过）
+（无 —— 非根目录返回与根目录退出已真机验证通过；非「文件」tab 后退切回「文件」待真机回归）
