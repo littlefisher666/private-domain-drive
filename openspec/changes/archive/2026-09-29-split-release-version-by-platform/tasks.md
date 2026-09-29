@@ -5,7 +5,7 @@
 - [x] 1.3 无任何平台前缀匹配的 Release 时返回空结果，由 `update_service.dart` 按已有"当前已是最新版本"路径处理，不抛错
 - [x] 1.4 更新 `client/lib/features/settings/application/update_service.dart` 的版本比较来源与本端资产匹配逻辑，对齐 `release-update-management` delta 规格各场景
 - [x] 1.5 更新与新增单元测试（`client/test/update_service_test.dart` 等）：覆盖"另一端单独发版不提示""本平台最新 Release 无更新""无平台匹配 Release 静默""清单缺本端资产不视为可更新"等场景
-- [ ] 1.6 `flutter test` 全量通过；真机验证 macOS 端在旧共享 `v*` Release 环境下表现为"已是最新版本"
+- [x] 1.6 `flutter test` 全量通过；真机验证 macOS 端在旧共享 `v*` Release 环境下表现为"已是最新版本"
 
 ## 2. 流水线：release.yml 平台拆分
 
@@ -18,11 +18,11 @@
 
 ## 3. 联调验证与首次发布
 
-- [ ] 3.1 本地触发（或 fork 分支 dry-run）验证：默认 `both`、单选 `android`、手动 `version` 三种输入组合的版本解析与 job 裁剪符合预期
-- [ ] 3.2 首次按新流水线发布：显式填写当前最新共享版本号，选 `both`，确认 `android/v*` 与 `macos/v*` tag、双 Release、单平台 update.json 形态正确
-- [ ] 3.3 真机验证更新检查：Android 单端发版后 macOS 客户端不提示更新；macOS 客户端能发现并完成本端更新（DMG 引导）；Android 端应用内更新（SHA-256 校验 + 安装器）回归通过
+- [x] 3.1 本地触发（或 fork 分支 dry-run）验证：默认 `both`、单选 `android`、手动 `version` 三种输入组合的版本解析与 job 裁剪符合预期
+- [x] 3.2 首次按新流水线发布：显式填写当前最新共享版本号，选 `both`，确认 `android/v*` 与 `macos/v*` tag、双 Release、单平台 update.json 形态正确
+- [x] 3.3 真机验证更新检查：Android 单端发版后 macOS 客户端不提示更新；macOS 客户端能发现并完成本端更新（DMG 引导）；Android 端应用内更新（SHA-256 校验 + 安装器）回归通过
 - [x] 3.4 同步文档：更新 `docs/接口.md` / `docs/Flutter架构设计.md` 中更新检查与发布流程的相关描述
 
 ## 4. 归档
 
-- [ ] 4.1 验证完成后执行 `/opsx:archive`，将 delta 规格同步至 `openspec/specs/`
+- [x] 4.1 验证完成后执行 `/opsx:archive`，将 delta 规格同步至 `openspec/specs/`
