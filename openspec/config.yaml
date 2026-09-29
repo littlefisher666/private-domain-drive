@@ -8,6 +8,33 @@ schema: spec-driven
 #     Tech stack: TypeScript, React, Node.js
 #     We use conventional commits
 #     Domain: e-commerce platform
+context: |
+  ## 项目：Private Domain Drive（私有云盘）
+  个人网盘类应用，一期目标为最小可用实现。
+
+  ## 技术栈
+  - 客户端：Flutter（Android + macOS 双端，共用大部分业务逻辑，平台差异收敛在基础设施适配层）
+  - 服务端：阿里云函数计算 FC，语言 Node.js（轻量，不引入重型 Web 框架，FC handler + 轻量路由）
+  - 存储：阿里云 OSS（客户端直连，不经服务端中转）
+  - 部署：Serverless Devs
+  - 仓库结构：主仓库用 Git Submodule 聚合 client/ 与 server/ 两个独立子仓库
+
+  ## 架构与凭证取舍（已确认，一期不变）
+  - 双 AccessKey 直连方案：FC 环境变量持有两对长期 RAM 密钥
+    - PDD_SERVER_OSS_*：读写 config/users.json
+    - PDD_CLIENT_OSS_*：登录校验通过后随 bootstrap 下发
+  - 客户端将下发的受限客户端密钥随会话持久化在平台安全存储中（Android 用系统加密存储，macOS 用本地偏好存储），冷启动自动恢复会话、无需重新登录；退出登录或密钥失效时清除持久化会话并引导重新登录，无独立刷新接口
+  - FC 仅承担登录鉴权与密钥下发，不承担文件流量中转或凭证刷新
+
+  ## 开发约束
+  - 优先一期最小可用，不提前扩展二期能力，不轻易引入数据库/常驻服务器/复杂后台
+  - 跨仓库共享信息优先维护在 docs/（PRD、用户故事、功能需求、技术文档、接口、Flutter架构设计）
+  - 客户端启动必须注入环境配置：flutter run -d macos/android --dart-define-from-file=env/local.json
+  - 真实凭证不得写入源码或提交仓库
+
+  ## OpenSpec 协作约定
+  - 新增/变更能力走 change 流程（propose → apply → archive），归档后更新 openspec/specs 主规格
+  - 规格用 Requirement + Scenario（WHEN/THEN）写法，中文描述
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
