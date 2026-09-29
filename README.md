@@ -66,8 +66,6 @@ flutter run -d android --dart-define-from-file=env/local.json
 | 文档 | 内容 |
 | --- | --- |
 | [PRD](./docs/PRD.md) | 产品背景、目标、范围、场景与分期 |
-| [用户故事](./docs/用户故事.md) | 角色、用户故事、异常路径与验收口径 |
-| [功能需求](./docs/功能需求.md) | 功能定义、关键流程与平台体验 |
 | [技术文档](./docs/技术文档.md) | 技术架构、传输、安全与 OSS / STS 设计 |
 | [接口文档](./docs/接口.md) | FC 接口契约、会话和错误码 |
 | [Flutter 架构设计](./docs/Flutter架构设计.md) | 客户端分层、目录与模块职责 |

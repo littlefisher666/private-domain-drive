@@ -28,7 +28,7 @@ context: |
 
   ## 开发约束
   - 优先一期最小可用，不提前扩展二期能力，不轻易引入数据库/常驻服务器/复杂后台
-  - 跨仓库共享信息优先维护在 docs/（PRD、用户故事、功能需求、技术文档、接口、Flutter架构设计）
+  - 跨仓库共享信息优先维护在 docs/（PRD、技术文档、接口、Flutter架构设计）；功能行为规格维护在 openspec/specs/
   - 客户端启动必须注入环境配置：flutter run -d macos/android --dart-define-from-file=env/local.json
   - 真实凭证不得写入源码或提交仓库
 
