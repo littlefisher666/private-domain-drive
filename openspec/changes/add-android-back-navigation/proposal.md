@@ -8,7 +8,8 @@ Android 端目录浏览采用状态切换（`setCurrentPath`）而非路由压�
 
 - 在工作区目录浏览页（`WorkspacePage`）拦截 Android 系统后退：非根目录时后退返回上一级目录，不退出应用
 - 到达根目录（全部文件）后恢复系统默认行为，后退键退出应用
-- 非「文件」tab（传输、回收站、我的）触发系统后退时，先切换回「文件」tab，不退出应用；仅在「文件」tab 且位于根目录时，后退才退出应用
+- 回收站内后退按虚拟目录逐级向上返回；到达回收站根目录后，后退切换回「文件」tab
+- 传输、我的等其他 tab 触发系统后退时，直接切换回「文件」tab，不退出应用；仅在「文件」tab 且位于根目录时，后退才退出应用
 - 已在 client 子仓库实现并通过真机（Android 16）验证
 - macOS 桌面端无系统后退路由，不受影响
 
@@ -24,6 +25,8 @@ Android 端目录浏览采用状态切换（`setCurrentPath`）而非路由压�
 
 ## Impact
 
-- 客户端：`client/lib/features/workspace/presentation/home_shell.dart`（移动端 `Scaffold` 包裹 `PopScope`，统一处理所有 tab 的后退拦截，依赖 `AppController.currentPath` / `rootPrefix` / `parentPath`）
+- 客户端：`client/lib/features/workspace/presentation/home_shell.dart`（移动端 `Scaffold` 包裹 `PopScope`，统一处理所有 tab 的后退拦截，依赖 `AppController.currentPath` / `recycleBinPath` / `rootPrefix` / `parentPath`）
+- 客户端：`client/lib/features/workspace/presentation/recycle_bin_page.dart`（虚拟目录状态从页内 `_currentPath` 提升到 `AppController.recycleBinPath`，`_goUp` 改用 controller 的 `parentPath`）
+- 客户端：`client/lib/shared/state/app_controller.dart`（新增 `recycleBinPath` 状态与 `setRecycleBinPath`）
 - 客户端：`client/lib/features/workspace/presentation/workspace_page.dart`（移除页内 `PopScope`，避免与 HomeShell 层重复拦截；`_goUp` 等目录切换能力保持不变）
 - 不涉及服务端、接口契约或其他客户端页面（预览页等路由页的后退由自身路由栈处理，行为不变）

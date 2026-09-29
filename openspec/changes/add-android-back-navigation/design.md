@@ -36,9 +36,10 @@
 ### Decision 3：拦截放在 `HomeShell` 移动端 `Scaffold` 层而非 `WorkspacePage` 内部
 
 - `WorkspacePage` 处于 `IndexedStack` 中，其内部的 `PopScope` 即使在非「文件」tab 时也仍注册在当前 `ModalRoute` 上：当「文件」位于根目录（`canPop=true`）时，在回收站等其他 tab 按后退会直接放行退出应用；当「文件」处于子目录时，后退会在后台静默切换目录，行为不可预期
-- 将唯一一处 `PopScope` 上移到 `HomeShell` 移动端分支：`canPop = _index == 0 && currentPath == rootPrefix`，`onPopInvokedWithResult` 中按「非「文件」tab 先切回「文件」→「文件」tab 内非根目录 `setCurrentPath(parentPath)` → 根目录放行」的顺序处理，一次性覆盖所有 tab
-- 目录切换复用 `AppController.setCurrentPath`，`WorkspacePage` 经 `AppScope`（`InheritedNotifier`）重建时在 build 中调用 `_syncDirectoryBinding` 自动重新加载列表，与页内 `_goUp()` 行为一致
-- 传输、回收站、我的等 tab 无目录层级概念，后退统一先回「文件」符合 Android「后退逐级回退到首页再退出」的惯例
+- 将唯一一处 `PopScope` 上移到 `HomeShell` 移动端分支：`canPop = _index == 0 && currentPath == rootPrefix`，`onPopInvokedWithResult` 中按「回收站内非根目录先向上 → 回收站根目录及其他非「文件」tab 切回「文件」→「文件」tab 内非根目录 `setCurrentPath(parentPath)` → 根目录放行」的顺序处理，一次性覆盖所有 tab
+- 回收站的虚拟目录状态（删除批次展开的目录树）从 `RecycleBinPage` 页内 `_currentPath` 提升为 `AppController.recycleBinPath`，使 HomeShell 能读取并驱动回收站的逐级返回；复用 `parentPath` 计算上级目录，并在每次点进回收站 tab 时重置为根目录（保持既有「进入即回到根部」的语义）
+- 目录切换复用 `AppController.setCurrentPath` / `setRecycleBinPath`，`WorkspacePage` / `RecycleBinPage` 经 `AppScope`（`InheritedNotifier`）重建后自动重新加载列表，与页内 `_goUp()` 行为一致
+- 传输、我的等 tab 无层级概念，后退统一先回「文件」符合 Android「后退逐级回退到首页再退出」的惯例
 
 ## Risks / Trade-offs
 
