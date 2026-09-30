@@ -134,6 +134,11 @@ lib/
       domain/
       infrastructure/
       presentation/
+    gallery/
+      application/           # GalleryController（相册状态与流程编排）
+      domain/                # PhotoEntry / PhotoManifest / GalleryConfig
+      infrastructure/        # 照片索引仓库、SQLite 元数据库、原图缓存、媒体/剪贴板桥
+      presentation/          # 相册时间线页、大图查看器、GalleryScope
     share_import/          # Android 系统分享，可先挂在 transfer/workspace 下，后续独立
       application/
       domain/
@@ -186,6 +191,7 @@ lib/
 | `preview` | US-07 / 功能 2.5 | 图片、PDF、文本预览 | P0 |
 | `share_import` | US-11 / 功能 2.8 | Android 系统分享接收与目录选择上传 | P0 |
 | `settings` | US-14 / US-15 | 账号信息、能力展示、关于/退出登录 | P1 |
+| `gallery` | 相册功能 | 照片时间线、照片索引、原图缓存、大图查看器 | P1 |
 
 说明：
 
@@ -405,6 +411,32 @@ class TransferTask {
 - 退出登录
 - 基础关于信息 / 版本号
 - 不提供复杂成员管理后台
+
+### 4.8 gallery 模块（相册）
+
+#### 职责
+
+- 网盘内全部照片/视频按拍摄时间的时间线浏览（Android 按天分组、macOS 按月分组）
+- 照片索引：OSS 清单对象 `index/photos.json`（读-改-写 + ETag 乐观并发）与本地 SQLite 副本双写；上传/删除/还原增量联动，损坏或冲突超限时标记待修复并由全量扫描自愈
+- 视频缩略图：上传前客户端截帧存为独立 OSS 小对象 `thumbs/<key>.jpg`（原生 MethodChannel：Android MediaMetadataRetriever / macOS AVFoundation），服务端不参与
+- 缩略图网格：图片走 OSS 图片处理参数，视频走索引映射的缩略图对象，复用 DiskImageCache 磁盘缓存
+- 原图缓存：专用缓存目录 + SQLite 记录，是云朵角标与查看器秒开判断的唯一依据；按时间（30 天）与容量（5 GB LRU）自动清理
+- 大图查看器：已缓存秒开本地文件，未缓存 1200px 降级展示并后台下载原图无缝替换；macOS 信息栏（基础/来源/位置）与悬浮栏自动隐藏
+- 多选与剪贴板：macOS 拖拽框选 / ⌘+单击 / ⌘A / ⌘C 复制原图 / ⌘V 粘贴上传；Android 长按多选 + 批量下载/系统分享/删除
+- 删除走回收站流程，并联动索引与缓存清理
+
+#### 关键模型
+
+- `PhotoEntry`：对象 key、媒体类型、拍摄时间、大小、所在目录、视频缩略图映射、EXIF 分辨率与 GPS、上传设备
+- `PhotoManifest`：清单版本号（单调递增）、扫描时间、待修复标记、条目列表
+- `GalleryDatabase`：按账号隔离的 SQLite（照片索引副本、原图缓存记录）
+- `GalleryController`：相册生命周期状态（加载/扫描/修复/就绪）、选中集、缓存角标状态，经 `GalleryScope` 注入
+
+#### 约束
+
+- 纯客户端 + OSS 约定实现，服务端 FC 不参与缩略图生成与照片索引（零服务端改动）
+- 内部对象前缀 `index/`、`thumbs/` 与清单对象不出现在文件浏览视图中（`OssClient.list` 过滤）
+- macOS 端不提供分享能力，Android 保留系统分享
 
 ## 5. 应用层与依赖管理
 

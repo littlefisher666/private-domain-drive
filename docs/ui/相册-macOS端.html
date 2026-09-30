@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>相册 · macOS 端效果图</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #1c1e26;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 56px;
+    padding: 48px 24px;
+    min-height: 100vh;
+  }
+  .shot { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .shot-label { color: #9aa0b4; font-size: 14px; letter-spacing: 1px; }
+
+  /* ===== 窗口外框 ===== */
+  .window {
+    width: 1180px;
+    height: 740px;
+    background: #f2f3f7;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 30px 70px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.14);
+    display: flex;
+    flex-direction: column;
+  }
+  .titlebar {
+    flex: none;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    background: #f2f3f7;
+    border-bottom: 1px solid #e2e4ea;
+    position: relative;
+    z-index: 6;
+  }
+  .traffic { display: flex; gap: 8px; }
+  .traffic span { width: 12px; height: 12px; border-radius: 50%; }
+  .traffic .r { background: #ff5f57; }
+  .traffic .y { background: #febc2e; }
+  .traffic .g { background: #28c840; }
+  .titlebar .title {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    font-size: 13.5px; font-weight: 600; color: #3a3d45;
+  }
+  .body-row { flex: 1; display: flex; min-height: 0; }
+
+  /* ===== 侧边栏 ===== */
+  .sidebar {
+    flex: none;
+    width: 200px;
+    background: #eceef3;
+    border-right: 1px solid #e0e2e9;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px;
+    height: 34px; padding: 0 10px;
+    border-radius: 7px;
+    font-size: 13.5px; color: #3a3d45;
+    cursor: pointer;
+  }
+  .nav-item svg { width: 17px; height: 17px; flex: none; }
+  .nav-item.active { background: #2f6fed; color: #fff; font-weight: 600; }
+  .side-section {
+    margin-top: 16px;
+    font-size: 11px; font-weight: 600; color: #9297a3;
+    padding: 0 10px 4px;
+    letter-spacing: .5px;
+  }
+  .side-dir { display: flex; align-items: center; gap: 9px; height: 30px; padding: 0 10px; border-radius: 7px; font-size: 13px; color: #4a4e58; cursor: pointer; }
+  .side-dir svg { width: 15px; height: 15px; flex: none; }
+
+  /* ===== 相册主区域 ===== */
+  .gallery-col {
+    flex: 1;
+    display: flex; flex-direction: column;
+    min-width: 0;
+    background: #fbfbfd;
+  }
+  .main-toolbar {
+    flex: none;
+    height: 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px;
+    border-bottom: 1px solid #ececf0;
+    background: #fbfbfd;
+  }
+  .main-toolbar h2 { font-size: 16px; font-weight: 700; color: #17191f; }
+  .main-toolbar .tools { display: flex; gap: 6px; }
+  .tool-btn {
+    width: 30px; height: 30px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    color: #4a4e58; cursor: pointer;
+  }
+  .tool-btn svg { width: 17px; height: 17px; }
+  .tool-btn:hover { background: #eceef3; }
+  .tool-btn.on { background: #e3ecfe; color: #2f6fed; }
+
+  .scroll {
+    flex: 1; overflow-y: auto;
+    padding: 0 20px 20px;
+  }
+  .group-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 18px 2px 10px;
+    position: sticky; top: 0;
+    background: linear-gradient(#fbfbfd 80%, rgba(251,251,253,0));
+    z-index: 2;
+  }
+  .group-head .date { font-size: 14.5px; font-weight: 700; color: #1b1d22; }
+  .group-head .count { font-size: 12px; color: #8a8f9c; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(126px, 1fr));
+    gap: 6px;
+  }
+  .ph {
+    aspect-ratio: 1;
+    border-radius: 7px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .ph::after { content: ""; position: absolute; inset: 0; background: var(--g); }
+  .ph:hover::before {
+    content: "";
+    position: absolute; inset: 0;
+    z-index: 4;
+    border: 3px solid rgba(47,111,237,.55);
+    border-radius: 7px;
+  }
+  .ph.selected::before {
+    content: "";
+    position: absolute; inset: 0;
+    z-index: 4;
+    border: 3px solid #2f6fed;
+    border-radius: 7px;
+  }
+  .ph .sel-mark {
+    position: absolute; top: 6px; left: 6px;
+    z-index: 5;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: #2f6fed;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ph .sel-mark svg { width: 11px; height: 11px; stroke: #fff; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .scroll { position: relative; }
+  .marquee {
+    position: absolute;
+    z-index: 6;
+    border: 1.5px dashed #2f6fed;
+    background: rgba(47,111,237,.12);
+    border-radius: 4px;
+    pointer-events: none;
+  }
+  .selection-bar {
+    flex: none;
+    height: 46px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px;
+    background: #e9f0fe;
+    border-bottom: 1px solid #d7e3fc;
+  }
+  .selection-bar .sel-count { font-size: 13px; font-weight: 600; color: #1d4fa8; }
+  .sel-actions { display: flex; gap: 8px; }
+  .sel-btn {
+    height: 28px; padding: 0 13px;
+    border-radius: 14px;
+    display: flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 600;
+    background: #fff; color: #3a3d45;
+    border: 1px solid #d9dce4;
+    cursor: pointer;
+  }
+  .sel-btn svg { width: 13px; height: 13px; }
+  .sel-btn.primary { background: #2f6fed; color: #fff; border-color: #2f6fed; }
+  .sel-btn.primary:hover { background: #2659c4; }
+  .sel-btn.ghost { border-color: transparent; background: transparent; color: #7c828e; }
+  .ph .badge {
+    position: absolute; left: 7px; bottom: 7px;
+    z-index: 3;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(20,22,28,.5);
+    backdrop-filter: blur(2px);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ph .badge svg { width: 13px; height: 13px; stroke: #fff; }
+  .ph .dur {
+    position: absolute; right: 7px; bottom: 7px;
+    z-index: 3;
+    font-size: 10.5px; color: #fff;
+    background: rgba(20,22,28,.5);
+    padding: 1px 6px; border-radius: 4px;
+  }
+  .p1  { --g: linear-gradient(135deg,#f6b26b,#e06666); }
+  .p2  { --g: linear-gradient(160deg,#8ab4f8,#3c64b1); }
+  .p3  { --g: linear-gradient(120deg,#b7e1cd,#4f9d69); }
+  .p4  { --g: linear-gradient(150deg,#f4d0a4,#c2803d); }
+  .p5  { --g: linear-gradient(135deg,#d9c2f0,#7a4fb5); }
+  .p6  { --g: linear-gradient(165deg,#9fd8ef,#2f7fa3); }
+  .p7  { --g: linear-gradient(140deg,#f2a3b3,#b13c55); }
+  .p8  { --g: linear-gradient(125deg,#cfd8dc,#607d8b); }
+  .p9  { --g: linear-gradient(155deg,#ffe08a,#d69a2d); }
+  .p10 { --g: linear-gradient(135deg,#a5d6a7,#2e7d32); }
+  .p11 { --g: linear-gradient(145deg,#b3c7f0,#4257a8); }
+  .p12 { --g: linear-gradient(130deg,#f8bbd0,#ad4a72); }
+
+  .status-line {
+    flex: none;
+    height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11.5px; color: #9297a3;
+    border-top: 1px solid #ececf0;
+    background: #fbfbfd;
+  }
+
+  /* ===== 大图查看器（第二屏） ===== */
+  .viewer-body { background: #17181d; flex: 1; display: flex; min-height: 0; }
+  .viewer-main {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  .viewer-top {
+    position: absolute; top: 0; left: 0; right: 0;
+    z-index: 5;
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px;
+    background: linear-gradient(rgba(10,11,14,.72), transparent);
+  }
+  .viewer-top .left { display: flex; align-items: center; gap: 10px; }
+  .v-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.92);
+    cursor: pointer;
+  }
+  .v-btn:hover { background: rgba(255,255,255,.14); }
+  .v-btn svg { width: 18px; height: 18px; }
+  .v-count { color: rgba(255,255,255,.75); font-size: 12.5px; }
+  .viewer-top .right { display: flex; gap: 6px; }
+
+  .photo-stage {
+    position: absolute;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .photo-stage .img {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: linear-gradient(160deg,#f6b26b 0%,#e06666 55%,#8e3b52 100%);
+  }
+  .viewer-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    z-index: 5;
+    display: flex; align-items: center; justify-content: center; gap: 26px;
+    padding: 34px 16px 18px;
+    background: linear-gradient(transparent, rgba(10,11,14,.72));
+  }
+  .v-act {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    color: rgba(255,255,255,.85); font-size: 11px; cursor: pointer;
+  }
+  .v-act svg { width: 19px; height: 19px; }
+  .v-act.primary { color: #7fa7f5; }
+  .v-act .dl-tag {
+    font-size: 9.5px; color: rgba(255,255,255,.55);
+  }
+  .zoom-hint {
+    position: absolute; right: 18px; bottom: 18px;
+    z-index: 5;
+    font-size: 11px; color: rgba(255,255,255,.45);
+  }
+
+  /* ===== 原图旁的信息栏 ===== */
+  .viewer-top, .viewer-bottom { transition: opacity .3s ease; }
+  .viewer-body.overlay-hidden .viewer-top,
+  .viewer-body.overlay-hidden .viewer-bottom { opacity: 0; pointer-events: none; }
+  .viewer-body.overlay-hidden .viewer-main { cursor: none; }
+  .viewer-main { cursor: default; }
+  .viewer-info {
+    flex: none;
+    width: 252px;
+    background: #1f2128;
+    border-left: 1px solid #30333d;
+    display: flex; flex-direction: column;
+    color: #d7dae2;
+  }
+  .vi-head {
+    flex: none;
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 14px;
+    border-bottom: 1px solid #30333d;
+    font-size: 13px; font-weight: 600;
+  }
+  .vi-head span { font-size: 11.5px; font-weight: 400; color: #7c828e; }
+  .vi-scroll { flex: 1; overflow-y: auto; padding: 14px 16px; }
+  .vi-group { margin-bottom: 18px; }
+  .vi-group .g-title {
+    font-size: 10.5px; font-weight: 600; color: #7c828e;
+    letter-spacing: .6px;
+    margin-bottom: 8px;
+  }
+  .vi-row {
+    display: flex; justify-content: space-between;
+    font-size: 12.5px;
+    padding: 6px 0;
+  }
+  .vi-row .k { color: #8d93a1; }
+  .vi-row .v { color: #e8eaef; font-weight: 500; text-align: right; }
+  .vi-row .v.cloud { color: #f0b26b; display: flex; align-items: center; gap: 5px; }
+  .vi-row .v.cloud svg { width: 13px; height: 13px; stroke: #f0b26b; }
+  .vi-people { display: flex; gap: 6px; }
+  .vi-people .face {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg,#b3c7f0,#4257a8);
+  }
+  .vi-people .face.f2 { background: linear-gradient(135deg,#f2a3b3,#b13c55); }
+  .vi-people .face.f3 { background: linear-gradient(135deg,#a5d6a7,#2e7d32); }
+  .vi-actions { flex: none; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .vbtn {
+    height: 34px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    font-size: 12.5px; font-weight: 600;
+    cursor: pointer;
+  }
+  .vbtn svg { width: 14px; height: 14px; }
+  .vbtn.primary { background: #2f6fed; color: #fff; }
+  .vbtn.secondary { background: #2c2f39; color: #d7dae2; }
+</style>
+</head>
+<body>
+
+<!-- ============ 屏 1：相册浏览（无右侧信息栏） ============ -->
+<div class="shot">
+  <div class="window">
+    <div class="titlebar">
+      <div class="traffic"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+      <div class="title">相册</div>
+    </div>
+    <div class="body-row">
+      <div class="sidebar">
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+          文件
+        </div>
+        <div class="nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-6 6-3-2.5L3 18"/></svg>
+          相册
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>
+          传输
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 4h4M7 7l1 13h8l1-13M10 11v6M14 11v6"/></svg>
+          回收站
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c1.3-3.2 4-4.8 7-4.8s5.7 1.6 7 4.8"/></svg>
+          我的
+        </div>
+        <div class="side-section">目录</div>
+        <div class="side-dir">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+          共享空间
+        </div>
+        <div class="side-dir">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+          照片备份
+        </div>
+        <div class="side-dir">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+          工作文档
+        </div>
+      </div>
+
+      <div class="gallery-col">
+        <div class="main-toolbar">
+          <h2>相册</h2>
+          <div class="tools">
+            <div class="tool-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></div>
+            <div class="tool-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4M8 8l4-4 4 4M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg></div>
+            <div class="tool-btn on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></div>
+          </div>
+        </div>
+        <div class="selection-bar">
+          <span class="sel-count">已选择 5 张</span>
+          <div class="sel-actions">
+            <div class="sel-btn primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+              复制
+            </div>
+            <div class="sel-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg>
+              下载原图
+            </div>
+            <div class="sel-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 4h4M7 7l1 13h8l1-13"/></svg>
+              删除
+            </div>
+            <div class="sel-btn ghost">取消</div>
+          </div>
+        </div>
+        <div class="scroll">
+          <div class="marquee" style="left:2.2%; top:88px; width:31%; height:186px;"></div>
+          <div class="group-head"><span class="date">2026年9月</span><span class="count">44 张</span></div>
+          <div class="grid">
+            <div class="ph p1"></div><div class="ph p2 selected"><span class="sel-mark"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L19 7"/></svg></span></div><div class="ph p3 selected"><span class="sel-mark"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L19 7"/></svg></span></div><div class="ph p4"></div>
+            <div class="ph p5 selected"><span class="sel-mark"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L19 7"/></svg></span></div><div class="ph p6 selected"><span class="sel-mark"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L19 7"/></svg></span></div><div class="ph p7"></div>
+            <div class="ph p8"><span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 18a4.5 4.5 0 0 0 .5-8.97A6.5 6.5 0 0 0 5.3 8.1 4.5 4.5 0 0 0 6 18h11.5z" stroke="#fff"/><path d="M9 14l3-3 3 3M12 11v6" stroke="#fff"/></svg></span></div>
+            <div class="ph p9"><span class="dur">02:14</span></div>
+            <div class="ph p10"></div><div class="ph p11"></div><div class="ph p12"></div>
+            <div class="ph p6"></div><div class="ph p2"></div><div class="ph p9"></div>
+            <div class="ph p4"></div><div class="ph p11"></div><div class="ph p3"></div>
+            <div class="ph p12"></div><div class="ph p7"></div><div class="ph p1"></div>
+            <div class="ph p5"></div><div class="ph p10"></div><div class="ph p8"></div>
+            <div class="ph p2"><span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 18a4.5 4.5 0 0 0 .5-8.97A6.5 6.5 0 0 0 5.3 8.1 4.5 4.5 0 0 0 6 18h11.5z" stroke="#fff"/><path d="M9 14l3-3 3 3M12 11v6" stroke="#fff"/></svg></span></div>
+            <div class="ph p9"></div><div class="ph p6"></div><div class="ph p4"></div>
+            <div class="ph p11"></div><div class="ph p12"></div><div class="ph p3"></div>
+            <div class="ph p7"></div><div class="ph p1"></div><div class="ph p10"></div>
+          </div>
+          <div class="group-head"><span class="date">2026年8月</span><span class="count">36 张</span></div>
+          <div class="grid">
+            <div class="ph p3"></div><div class="ph p8"></div><div class="ph p5"></div>
+            <div class="ph p9"></div><div class="ph p12"></div><div class="ph p2"></div>
+            <div class="ph p10"></div><div class="ph p4"></div><div class="ph p7"></div>
+            <div class="ph p11"></div><div class="ph p6"></div><div class="ph p1"></div>
+            <div class="ph p9"></div><div class="ph p3"></div><div class="ph p12"></div>
+            <div class="ph p5"></div><div class="ph p8"></div><div class="ph p2"></div>
+          </div>
+        </div>
+        <div class="status-line">共 1,248 张照片和视频 · 已用空间 8.6 GB · 其中 36 张原图未缓存到本机</div>
+      </div>
+    </div>
+  </div>
+  <div class="shot-label">① 相册浏览（支持拖拽框选 / 勾选 · 选中后 ⌘C 批量复制到剪贴板）</div>
+</div>
+
+<!-- ============ 屏 2：大图查看器（信息展示在原图旁边） ============ -->
+<div class="shot">
+  <div class="window">
+    <div class="titlebar">
+      <div class="traffic"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+      <div class="title">IMG_20260930_123015.jpg</div>
+    </div>
+    <div class="body-row viewer-body">
+      <div class="viewer-main">
+        <div class="viewer-top">
+          <div class="left">
+            <div class="v-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></div>
+            <span class="v-count">32 / 44</span>
+          </div>
+          <div class="right">
+            <div class="v-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="8" y="3" width="8" height="12" rx="1.5"/><path d="M5 6v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6M12 15v-3M10.5 13.5 12 15l1.5-1.5"/></svg></div>
+            <div class="v-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg></div>
+          </div>
+        </div>
+        <div class="photo-stage"><div class="img"></div></div>
+        <div class="viewer-bottom">
+          <div class="v-act">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+            复制
+          </div>
+          <div class="v-act primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg>
+            下载原图
+            <span class="dl-tag">3.2 MB · 原图未在本机</span>
+          </div>
+          <div class="v-act">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            下一张
+          </div>
+          <div class="v-act">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 4h4M7 7l1 13h8l1-13"/></svg>
+            删除
+          </div>
+        </div>
+        <div class="zoom-hint">滚动缩放 · 方向键切换</div>
+      </div>
+
+      <div class="viewer-info">
+        <div class="vi-head">信息 <span>32 / 44</span></div>
+        <div class="vi-scroll">
+          <div class="vi-group">
+            <div class="g-title">基础</div>
+            <div class="vi-row"><span class="k">拍摄时间</span><span class="v">2026-09-30 12:30</span></div>
+            <div class="vi-row"><span class="k">分辨率</span><span class="v">4032 × 3024</span></div>
+            <div class="vi-row"><span class="k">原始大小</span><span class="v">3.2 MB</span></div>
+            <div class="vi-row"><span class="k">格式</span><span class="v">JPEG</span></div>
+          </div>
+          <div class="vi-group">
+            <div class="g-title">来源</div>
+            <div class="vi-row"><span class="k">所在目录</span><span class="v">/照片备份/2026-09</span></div>
+            <div class="vi-row"><span class="k">上传设备</span><span class="v">iPhone 15 Pro</span></div>
+            <div class="vi-row"><span class="k">本机缓存</span>
+              <span class="v cloud">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 18a4.5 4.5 0 0 0 .5-8.97A6.5 6.5 0 0 0 5.3 8.1 4.5 4.5 0 0 0 6 18h11.5z"/><path d="M9 14l3-3 3 3M12 11v6"/></svg>
+                未缓存
+              </span>
+            </div>
+          </div>
+          <div class="vi-group">
+            <div class="g-title">位置</div>
+            <div class="vi-row"><span class="k">拍摄地点</span><span class="v">河南省 郑州市</span></div>
+          </div>
+        </div>
+        <div class="vi-actions">
+          <div class="vbtn primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg>
+            下载原图
+          </div>
+          <div class="vbtn secondary">在文件中显示</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="shot-label">② 点开大图（原图居中 · 信息栏在原图右侧 · 移动鼠标显示悬浮栏，静止 2 秒自动隐藏）</div>
+</div>
+
+<script>
+  // 模拟 Quick Look 行为：移动鼠标显示悬浮栏，静止 2 秒后连同指针一起隐藏
+  (function () {
+    const body = document.querySelector('.viewer-body');
+    const main = document.querySelector('.viewer-main');
+    if (!body || !main) return;
+    let timer;
+    function wake() {
+      body.classList.remove('overlay-hidden');
+      clearTimeout(timer);
+      timer = setTimeout(() => body.classList.add('overlay-hidden'), 2000);
+    }
+    main.addEventListener('mousemove', wake);
+    body.classList.add('overlay-hidden');
+  })();
+</script>
+
+</body>
+</html>
