@@ -417,8 +417,8 @@ class TransferTask {
 #### 职责
 
 - 网盘内全部照片/视频按拍摄时间的时间线浏览（Android 按天分组、macOS 按月分组）
-- 照片索引：OSS 清单对象 `index/photos.json`（读-改-写 + ETag 乐观并发）与本地 SQLite 副本双写；上传/删除/还原增量联动，损坏或冲突超限时标记待修复并由全量扫描自愈
-- 视频缩略图：上传前客户端截帧存为独立 OSS 小对象 `thumbs/<key>.jpg`（原生 MethodChannel：Android MediaMetadataRetriever / macOS AVFoundation），服务端不参与
+- 照片索引：OSS 清单对象 `.gallery/index/photos.json`（读-改-写 + ETag 乐观并发）与本地 SQLite 副本双写；上传/删除/还原增量联动，损坏或冲突超限时标记待修复并由全量扫描自愈
+- 视频缩略图：上传前客户端截帧存为独立 OSS 小对象 `.gallery/thumbs/<key>.jpg`（原生 MethodChannel：Android MediaMetadataRetriever / macOS AVFoundation），服务端不参与
 - 缩略图网格：图片走 OSS 图片处理参数，视频走索引映射的缩略图对象，复用 DiskImageCache 磁盘缓存
 - 原图缓存：专用缓存目录 + SQLite 记录，是云朵角标与查看器秒开判断的唯一依据；按时间（30 天）与容量（5 GB LRU）自动清理
 - 大图查看器：已缓存秒开本地文件，未缓存 1200px 降级展示并后台下载原图无缝替换；macOS 信息栏（基础/来源/位置）与悬浮栏自动隐藏
@@ -435,7 +435,7 @@ class TransferTask {
 #### 约束
 
 - 纯客户端 + OSS 约定实现，服务端 FC 不参与缩略图生成与照片索引（零服务端改动）
-- 内部对象前缀 `index/`、`thumbs/` 与清单对象不出现在文件浏览视图中（`OssClient.list` 过滤）
+- 内部对象统一收敛在 `.gallery/` 点前缀目录下（避免与用户自建目录撞名）；文件浏览统一隐藏所有点前缀条目（含回收站 `.trash/`、`.DS_Store` 等），文件夹统计同样不计入，目录级删除/回收操作仍处理全部对象（`OssClient.list` 过滤）
 - macOS 端不提供分享能力，Android 保留系统分享
 
 ## 5. 应用层与依赖管理
