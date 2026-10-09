@@ -255,7 +255,7 @@ class StsCredentials {
 
 - 基于 OSS prefix 浏览目录
 - 展示名称、类型、大小、更新时间
-- 新建文件夹、重命名、删除
+- 新建文件夹、重命名、移动、删除
 - 列表 / 缩略图切换
 - 根据 `Capabilities` 控制操作入口
 
@@ -297,6 +297,17 @@ enum BrowseMode { list, grid }
 - 文件操作能力默认全员开放；无对应能力时隐藏或禁用入口
 - 一期不区分管理员与普通成员
 - 即使 UI 误显示，OSS 拒绝后也要给出明确提示
+
+#### 移动规则
+
+- 移动 = 逐对象「copy 成功后立即 delete 源」，天然幂等；中断重跑无需逐对象进度账本
+- 文件夹移动经 `listAllObjectKeys` 递归展开（含目录标记对象），映射到目标前缀下
+- 移动开始前写 manifest 至 `shared/.moves/<id>/manifest.json`，完成或撤销后删除；失败保留供冷启动「继续 / 撤销」
+- 目标合法性校验先行：目标不得为源目录自身或其子目录，不得与源所在目录相同
+- 同名冲突不覆盖：跳过或自动追加序号（保留两者），由对话框显式选择
+- 移动为独占前台操作，进行中禁止再次发起；UI 通过 `moveStateListenable` 展示进度，完成后统一刷新
+- `.moves/` 前缀以点前缀约定在文件浏览、目录统计与相册索引中隐藏
+- 目标目录由专用目录选择对话框（面包屑 + 目录列表）选定，非法目标禁用确认
 
 ### 4.4 transfer 模块
 
@@ -571,7 +582,7 @@ abstract class PlatformFileGateway {
 | 能力 | 调用方 | 目标 |
 | --- | --- | --- |
 | 登录 / 取 STS / 能力 / OSS 配置 | auth.infrastructure | FC |
-| 列举、上传、下载、删除、重命名 | workspace/transfer.infrastructure | OSS |
+| 列举、上传、下载、删除、重命名、移动（copy+delete 组合） | workspace/transfer.infrastructure | OSS |
 | 文件选择、拖拽、分享、本地路径 | platform | OS |
 
 ### 7.3 错误模型
