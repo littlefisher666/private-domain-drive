@@ -20,7 +20,7 @@
 - [x] 3.2 macos job 新增签名步骤：安装 Sparkle 工具，用 `sign_update` 与 Secret `SPARKLE_EDDSA_PRIVATE_KEY` 对 zip 签名，输出 EdDSA 签名串与文件长度；签名失败时按设计降级（该版本仅发布 DMG，不阻塞流水线）
 - [x] 3.3 release job 新增 appcast 维护步骤：从 `appcast` 分支读取现有 `appcast.xml`，合并新 item（版本号、Release 下载地址、EdDSA 签名、文件长度、更新说明链接），推回 `appcast` 分支；首次运行时以当前最新 macOS Release 为种子生成完整 appcast
 - [x] 3.4 release job 将 zip 与 DMG 一同挂载到 macOS Release assets，更新 update.json 生成逻辑不受影响
-- [ ] 3.5 流水线整体演练：以测试版本号触发 workflow，验证 Release 资产齐全、`appcast` 分支 appcast 内容正确、EdDSA 签名可用 `sign_update --verify` 类方式校验通过
+- [x] 3.5 流水线整体演练：以测试版本号触发 workflow，验证 Release 资产齐全、`appcast` 分支 appcast 内容正确、EdDSA 签名可用 `sign_update --verify` 类方式校验通过
 
 ## 4. 端到端验证
 
