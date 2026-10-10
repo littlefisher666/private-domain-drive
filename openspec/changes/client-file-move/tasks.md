@@ -38,7 +38,7 @@
 ## 6. 文档与收尾
 
 - [x] 6.1 核对并按需更新 `docs/Flutter架构设计.md`（新增 widget 与 AppController 职责说明）
-- [ ] 6.2 在 client 子仓库提交实现，主仓库更新 submodule 指针并提交本 change 的规格产物
+- [x] 6.2 在 client 子仓库提交实现，主仓库更新 submodule 指针并提交本 change 的规格产物
 
 ## 7. 性能修订（D7/D8，实施期新增）
 
