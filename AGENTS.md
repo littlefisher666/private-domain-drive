@@ -15,20 +15,20 @@
 根目录下主要包含：
 
 - `docs/`
-- `private-domain-drive-client/`
-- `private-domain-drive-server/`
+- `client/`
+- `server/`
 
 其中：
 
 - `docs/` 用于存放产品、技术、接口、模块设计等项目文档
-- `private-domain-drive-client/` 是客户端独立子仓库
-- `private-domain-drive-server/` 是服务端独立子仓库
+- `client/` 是客户端独立子仓库
+- `server/` 是服务端独立子仓库
 
 ## 子仓库职责边界
 
 ### 客户端子仓库
 
-目录：`private-domain-drive-client/`
+目录：`client/`
 
 职责：
 
@@ -43,7 +43,7 @@
 
 ### 服务端子仓库
 
-目录：`private-domain-drive-server/`
+目录：`server/`
 
 职责：
 
@@ -102,14 +102,14 @@
 
 要求：
 
-- `private-domain-drive-client/` 作为独立 Git 仓库维护
-- `private-domain-drive-server/` 作为独立 Git 仓库维护
+- `client/` 作为独立 Git 仓库维护
+- `server/` 作为独立 Git 仓库维护
 - 主仓库只记录 submodule 引用版本，不在主仓库中直接替代子仓库提交历史
 
 协作时注意：
 
-- 修改客户端代码，应进入 `private-domain-drive-client/` 仓库提交
-- 修改服务端代码，应进入 `private-domain-drive-server/` 仓库提交
+- 修改客户端代码，应进入 `client/` 仓库提交
+- 修改服务端代码，应进入 `server/` 仓库提交
 - 子仓库提交更新后，如需在主仓库记录引用变化，再回到主仓库更新 submodule 指针
 
 ## GPG 私钥与 git-crypt 说明
@@ -185,8 +185,8 @@
 开始新工作前，优先判断修改应发生在哪一层：
 
 - 产品或架构变更：主仓库 `docs/`
-- Flutter 客户端实现：`private-domain-drive-client/`
-- FC 服务端实现：`private-domain-drive-server/`
+- Flutter 客户端实现：`client/`
+- FC 服务端实现：`server/`
 
 如果一个改动同时影响文档与代码：
 
