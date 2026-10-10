@@ -112,6 +112,19 @@
 - 修改服务端代码，应进入 `private-domain-drive-server/` 仓库提交
 - 子仓库提交更新后，如需在主仓库记录引用变化，再回到主仓库更新 submodule 指针
 
+## GPG 私钥与 git-crypt 说明
+
+本仓库使用 git-crypt 加密 `secrets/**` 目录，涉及以下 GPG 密钥信息（防止日后遗忘）：
+
+- 加密所用 GPG 主密钥：`5980A420FA65EDBB`（指纹 `9D194C02CF72822F4C62900B5980A420FA65EDBB`，ed25519，2026-10-10 创建，子密钥 `307D6001D895DC68`，归属 `littlefisher <littlefisher666@users.noreply.github.com>`）
+- 私钥只存在于作者本机 GnuPG keyring（`~/.gnupg`），未上传密钥服务器
+- GPG 私钥口令备份在作者 macOS 钥匙串（login keychain）中，条目信息：
+  - 服务名：`private-domain-drive-gpg-backup`
+  - 帐户：`littlefisher666`
+  - 显示名称：`Private Domain Drive - git-crypt GPG 私钥`
+
+新机器解密仓库的流程：从作者本机导出私钥（`gpg --export-secret-keys -a 5980A420FA65EDBB`）并导入，然后执行 `git-crypt unlock`。不要将 GPG 私钥或口令写入仓库任何文件。
+
 ## 技术方向约定
 
 当前项目的一期默认技术方向如下：
