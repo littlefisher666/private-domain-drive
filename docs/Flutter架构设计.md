@@ -300,7 +300,7 @@ enum BrowseMode { list, grid }
 
 #### 移动规则
 
-- 移动 = 逐对象「copy 成功后立即 delete 源」，天然幂等；中断重跑无需逐对象进度账本
+- 移动 = 分批并发「copy 到目标」+ 每批 `deleteMany` 删源（单对象 copy 先于其源删除），天然幂等；中断重跑无需逐对象进度账本
 - 文件夹移动经 `listAllObjectKeys` 递归展开（含目录标记对象），映射到目标前缀下
 - 移动开始前写 manifest 至 `shared/.moves/<id>/manifest.json`，完成或撤销后删除；失败保留供冷启动「继续 / 撤销」
 - 目标合法性校验先行：目标不得为源目录自身或其子目录，不得与源所在目录相同
