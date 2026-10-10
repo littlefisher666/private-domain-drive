@@ -47,19 +47,19 @@ git submodule update --init --recursive
 
 本地运行和环境变量说明请分别查看：
 
-- [客户端 README](./client/README.md)：Flutter 依赖、`env/local.json`、Android / macOS 启动、测试与发布。
-- [服务端 README](./server/README.md)：STS / OSS 环境变量、本地 Node.js 调试、测试与 FC 部署。
+- [客户端 README](./client/README.md)：Flutter 依赖、环境配置、Android / macOS 启动、测试与发布。
+- [服务端 README](./server/README.md)：OSS 环境变量、本地 Node.js 调试、测试与 FC 部署。
 
 客户端启动必须注入本地环境配置：
 
 ```bash
 cd client
-flutter run -d macos --dart-define-from-file=env/local.json
+flutter run -d macos --dart-define-from-file=../secrets/client/local.json
 # 或
-flutter run -d android --dart-define-from-file=env/local.json
+flutter run -d android --dart-define-from-file=../secrets/client/local.json
 ```
 
-`env/local.json` 以及任何真实 AccessKey、密钥和本地签名文件均不得提交到仓库。
+环境配置统一存放在主仓库 `secrets/` 目录（`secrets/client/local.json`、`secrets/server/.env`），经 git-crypt 加密后随主仓库提交。任何真实 AccessKey、密钥和本地签名文件均不得以明文形式提交到任何仓库。
 
 ## GPG 私钥备份说明
 
@@ -67,11 +67,12 @@ flutter run -d android --dart-define-from-file=env/local.json
 
 - **密钥**：GPG 主密钥 `5980A420FA65EDBB`（指纹 `9D194C02CF72822F4C62900B5980A420FA65EDBB`，ed25519，2026-10-10 创建，子密钥 `307D6001D895DC68`）
 - **归属**：`littlefisher <littlefisher666@users.noreply.github.com>`
-- **私钥位置**：仅存在于作者本机 GnuPG keyring（`~/.gnupg`），未上传到任何密钥服务器
-- **口令备份**：GPG 私钥口令存储在作者 macOS 钥匙串（login keychain）中，条目名为：
+- **私钥位置**：仅存在于作者本机 GnuPG keyring（`~/.gnupg`），未上传到任何密钥服务器；该密钥未设置口令（passphrase）
+- **私钥备份**：GPG 私钥本身（非口令）已完整备份到作者 macOS 钥匙串（login keychain）中，条目名为：
   - 服务名：`private-domain-drive-gpg-backup`
   - 帐户：`littlefisher666`
   - 显示名称：`Private Domain Drive - git-crypt GPG 私钥`
+  - 取回时注意：`security find-generic-password -s "private-domain-drive-gpg-backup" -w` 输出为十六进制编码，需解码后使用
 
 如需在新机器上解密仓库，需先从作者本机导出该 GPG 私钥并导入（`gpg --export-secret-keys -a 5980A420FA65EDBB`），再执行 `git-crypt unlock`。
 

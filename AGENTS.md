@@ -117,11 +117,12 @@
 本仓库使用 git-crypt 加密 `secrets/**` 目录，涉及以下 GPG 密钥信息（防止日后遗忘）：
 
 - 加密所用 GPG 主密钥：`5980A420FA65EDBB`（指纹 `9D194C02CF72822F4C62900B5980A420FA65EDBB`，ed25519，2026-10-10 创建，子密钥 `307D6001D895DC68`，归属 `littlefisher <littlefisher666@users.noreply.github.com>`）
-- 私钥只存在于作者本机 GnuPG keyring（`~/.gnupg`），未上传密钥服务器
-- GPG 私钥口令备份在作者 macOS 钥匙串（login keychain）中，条目信息：
+- 私钥只存在于作者本机 GnuPG keyring（`~/.gnupg`），未上传密钥服务器；该密钥未设置口令（passphrase）
+- GPG 私钥本身（非口令）已完整备份到作者 macOS 钥匙串（login keychain）中，条目信息：
   - 服务名：`private-domain-drive-gpg-backup`
   - 帐户：`littlefisher666`
   - 显示名称：`Private Domain Drive - git-crypt GPG 私钥`
+  - 取回方式：`security find-generic-password -s "private-domain-drive-gpg-backup" -w` 输出为十六进制编码，需解码后使用
 
 新机器解密仓库的流程：从作者本机导出私钥（`gpg --export-secret-keys -a 5980A420FA65EDBB`）并导入，然后执行 `git-crypt unlock`。不要将 GPG 私钥或口令写入仓库任何文件。
 
@@ -161,9 +162,9 @@
 - Android 与 macOS 共用大部分业务逻辑
 - 平台差异尽量收敛在基础设施适配层
 - 目录结构、分层设计优先遵循 `docs/Flutter架构设计.md`
-- Android 与 macOS 客户端启动都必须从 `client/env/local.json` 注入环境配置，使用命令：
-  - macOS：`flutter run -d macos --dart-define-from-file=env/local.json`
-  - Android：`flutter run -d android --dart-define-from-file=env/local.json`
+- Android 与 macOS 客户端启动都必须从主仓库 `secrets/client/local.json` 注入环境配置（在 `client/` 目录下执行，经 git-crypt 加密管理），使用命令：
+  - macOS：`flutter run -d macos --dart-define-from-file=../secrets/client/local.json`
+  - Android：`flutter run -d android --dart-define-from-file=../secrets/client/local.json`
 - 不得使用未注入环境配置的普通 `flutter run -d macos` 或 `flutter run -d android` 作为联调启动方式；不得将环境文件中的真实凭证写入源码或提交到仓库
 
 ### 服务端约束
