@@ -323,17 +323,18 @@ enum BrowseMode { list, grid }
 #### 职责
 
 - 统一管理上传 / 下载任务
-- 进度、成功、失败、取消状态
+- 进度、成功、失败、取消、已中断状态
 - 大文件分片上传
 - 失败重试
 - 为 workspace、share_import、preview 提供统一任务入口
+- 未完成上传任务的持久化与冷启动恢复（见下文「上传任务持久化与恢复」）
 
 #### 关键模型
 
 与现有骨架对齐并扩展：
 
 ```dart
-enum TransferTaskStatus { pending, running, success, failed, canceled }
+enum TransferTaskStatus { pending, running, success, failed, canceled, interrupted }
 enum TransferTaskType { upload, download }
 
 class TransferTask {
@@ -344,6 +345,7 @@ class TransferTask {
   final double progress; // 0.0 ~ 1.0
   final String? remotePath;
   final String? localPath;
+  final String? targetDir; // 上传内部目录路径，持久化恢复后重建对象键
   final String? message;
   final DateTime createdAt;
   final DateTime? updatedAt;
@@ -379,6 +381,16 @@ class TransferTask {
 - 上传下载速度由 Flutter 使用最近 2 秒字节窗口计算，并按 100ms 节流 UI
 - 运行中取消通过平台桥接中止 SDK请求，退出登录同步清理原生凭证
 
+#### 上传任务持久化与恢复
+
+- 持久化介质沿用 SharedPreferences，新增 key `upload_pending:v1`，存「仅上传、非终态（排队 / 进行中 / 失败 / 已中断）」任务的 `TransferTask.toJson()` 列表；终态历史沿用既有 `transfer_history:v1`
+- 写入时机：仅任务状态迁移时整表重写（入队、running、failed、success、canceled、interrupted 恢复），上传进度回调不触发写入（状态签名比对去重）
+- 源文件 staging：位于应用缓存目录（系统分享拷贝、部分选择器结果）的上传源文件在入队前由 `UploadStaging` 迁移到 `getApplicationSupportDirectory()/upload-staging/<taskId>-<fileName>`（move 语义，不产生双份占用）；持久路径（如 macOS 本地磁盘选择的文件）不迁移
+- staging 清理时机：任务成功、被放弃、任务从列表移除时，按「sourcePath 位于 staging 目录内」判定删除
+- 冷启动恢复：bootstrap 阶段读取 `upload_pending:v1`，源文件存在 → 转为「已中断」（interrupted）状态展示，不自动续传；源文件缺失 → 标记失败（原因「源文件已丢失」）并从持久化记录清理
+- 恢复交互：传输中心对已中断任务提供「继续上传」（复用既有重试路径重新入队，进度归零、从头重传）与「放弃」（转已取消并清理 staging 文件），并提供「全部继续 / 全部放弃」批量入口；支持按单个任务处理，不强制整批
+- 排序：传输中心任务列表按「进行中 > 等待中 > 已中断 > 已结束」优先级排列
+
 ### 4.5 preview 模块
 
 #### 职责
@@ -404,7 +416,8 @@ class TransferTask {
 #### 职责
 
 - 接收系统 `SEND` / `SEND_MULTIPLE`
-- 展示待上传列表
+- 后台异步复制分享文件并逐项反馈导入进度
+- 展示待上传列表与导入进度
 - 选择目标文件夹
 - 登录态恢复后不丢失待上传内容
 - 确认后交给 `transfer` 创建上传任务
@@ -412,16 +425,32 @@ class TransferTask {
 #### 关键流程
 
 1. 系统拉起 App（冷/热启动）
-2. 解析分享内容为本地待上传项
-3. 若未登录或会话失效，先走 auth 恢复
-4. 进入确认页：列表、目标目录、切换目录、确认/取消
-5. 确认后创建上传任务
+2. 原生端（`MainActivity.kt`）在主线程解析分享 URI 列表，文件复制提交到
+   后台单线程执行器串行执行，不阻塞主线程
+3. 原生端按信封事件协议（`batch_start` → `item` → `batch_done`，事件携带
+   UUID `batchId` 与成功/失败计数）经 EventChannel 推送：每个文件复制成功
+   即逐项推送；复制失败的单项跳过，失败数在 `batch_done` 中体现
+4. Dart 侧（`AndroidShareImportBridge`）解析信封事件为类型化对象，未知
+   事件类型忽略并打日志；`AppController` 以
+   `beginShareImportBatch` / `addShareImportItem` / `finishShareImportBatch`
+   渐进接收，批次完成后并入待上传清单
+5. 冷启动兜底：eventSink 未监听时原生端缓冲事件，`onListen` 按序冲刷；
+   `takePendingItems` 返回缓冲中已完整的批次，由 `AppController` 转为
+   「立即完成」的批次并入
+6. 若未登录或会话失效，先走 auth 恢复（批次照常渐进接收）
+7. 目录选择弹窗可先于复制完成弹出：批次未完成时展示「正在导入 x/n」并
+   禁用「上传到此处」按钮，批次完成后启用；存在失败项时提示失败数量，
+   其余文件可正常继续上传
+8. 确认后以批次完成后的完整待上传清单创建上传任务
 
 #### 约束
 
 - 一期优先图片，普通文件尽量兼容同一流程
 - 无上传权限时明确拒绝，不创建无效任务
 - 确认前允许移除部分项
+- 分享防重入以批次 id 为签名：同一批次不重复弹窗，取消弹窗后清除签名，
+  重新分享同一批内容可再次弹出
+- 批次复制完成前禁止确认上传，保证确认时待上传清单完整
 
 ### 4.7 settings 模块
 
@@ -521,7 +550,9 @@ sequenceDiagram
 | `/transfers` | TransferTasksPage | 传输中心 |
 | `/settings` | SettingsPage | 我的/设置 |
 
-Android 分享导入不使用独立路由页面，由根组件在分享事件到达后直接弹出 `ShareTargetDialog` 目录选择弹窗，确认后立即创建上传任务。
+Android 分享导入不使用独立路由页面，由根组件在分享批次事件（以批次 id 为
+防重入签名）到达后直接弹出 `ShareTargetDialog` 目录选择弹窗，弹窗内展示
+导入进度、批次完成后才允许确认，确认后立即创建上传任务。
 
 ### 6.2 平台导航骨架
 
