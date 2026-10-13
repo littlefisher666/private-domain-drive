@@ -67,6 +67,23 @@
 - **WHEN** zip 打包或 `sign_update` 签名在流水线中失败
 - **THEN** 流水线 SHALL 允许本次 Release 仅以 DMG 完成（该版本不具备自更新触达能力），SHALL NOT 因 Sparkle 产物失败丢弃 DMG 发布
 
+### Requirement: appcast 更新说明的渲染格式
+发布流水线 SHALL 为 appcast 每个 item 的 `<description>` 显式声明 `sparkle:format="markdown"`，并 SHALL 以 Markdown 内容填充，使更新日志在 Sparkle 更新弹窗中按分类标题与列表条目分行呈现；格式属性 SHALL 使用带 sparkle 命名空间前缀的 `sparkle:format`，SHALL NOT 使用无前缀的 `type` 或其他属性名；更新说明 SHALL NOT 包含仅适用于 Release 页面的平台标注引用块与大标题，SHALL 只保留分类小标题与条目列表。
+
+该约定 SHALL 覆盖 appcast 中全部历史 item：修复既有 item 时 SHALL 为其补齐 `sparkle:format` 属性并迁移说明内容格式，使尚未升级到最新版的客户端也能正确分行展示。
+
+#### Scenario: 新 item 按 Markdown 声明格式
+- **WHEN** 流水线为本次 macOS 发版生成新的 appcast item
+- **THEN** 该 item 的 `<description>` SHALL 携带 `sparkle:format="markdown"` 属性，Sparkle SHALL 按 Markdown 渲染并将条目分行呈现，SHALL NOT 将换行折叠为单段文本
+
+#### Scenario: 属性名缺失导致格式失效
+- **WHEN** `<description>` 未携带 `sparkle:format` 属性，或改用 `type` 等无命名空间前缀的属性名
+- **THEN** Sparkle SHALL 无法识别声明的格式并按 HTML 渲染纯文本，将换行折叠为空格、更新日志挤成单段，流水线与构建 SHALL NOT 因此报错
+
+#### Scenario: 历史 item 补齐格式声明
+- **WHEN** appcast 中存在未声明 `sparkle:format` 的历史 item
+- **THEN** 维护 appcast 时 SHALL 为其补齐该属性并保证说明内容可被 Markdown 正确解析，SHALL NOT 仅对新增 item 生效
+
 ### Requirement: 发布说明范围与平台标注
 发布流水线 SHALL 以"上一次同平台版本 tag 到本次"作为更新说明的 commit 范围，并在说明开头标注本次发布涉及的平台。
 
