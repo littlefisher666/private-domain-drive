@@ -391,6 +391,15 @@ class TransferTask {
 - 恢复交互：传输中心对已中断任务提供「继续上传」（复用既有重试路径重新入队，进度归零、从头重传）与「放弃」（转已取消并清理 staging 文件），并提供「全部继续 / 全部放弃」批量入口；支持按单个任务处理，不强制整批
 - 排序：传输中心任务列表按「进行中 > 等待中 > 已中断 > 已结束」优先级排列
 
+#### Android 传输前台保活
+
+- 平台适配层：`lib/shared/transfer_keepalive.dart` 提供 `TransferKeepaliveService` 抽象（`sync(active, summary)` 幂等启停 + `requestNotificationPermissionIfNeeded`）与平台分支工厂；`Platform.isAndroid` 判断收敛在工厂内，macOS 为 no-op，传输编排逻辑零感知
+- 原生实现：自研 Kotlin `TransferKeepaliveService`（dataSync 前台服务，仅「保活进程 + 挂通知」单一职责，无业务逻辑），经 MethodChannel `private_domain_drive/transfer_keepalive` 暴露 start/update/stop/requestNotificationPermission；传输执行仍完整留在 Flutter 主 isolate
+- 启停时机：`AppController` 在队列状态变化点（入队、任务启动、任务终态、取消及运行集收敛后）计算活跃状态（进行中或等待中任务非空）与进度摘要（剩余任务数、总字节进度百分比）推送；由空闲转活跃启动服务，活跃转空闲立即停止
+- 进度节流：通知更新最短间隔 1 秒且内容变化才刷新（时钟可注入便于单测），活跃状态切换不节流
+- 通知样式：进行中常驻通知在 Android 16+ 用 `Notification.ProgressStyle`（Live Updates API）发送——ColorOS 16 流体云将其渲染为刘海位置胶囊，展示「已完成 X/N · Y%」，低版本回退系统标准文字样式，均走 IMPORTANCE_DEFAULT 静音渠道（`setSound(null, null)`；ColorOS 等 ROM 不为 IMPORTANCE_LOW 渠道渲染状态栏图标）；批次计数由 `AppController` 维护（空闲转活跃归零、任务终态累计已完成、新增任务扩容批次总数）；队列由活跃转空闲时停止服务并弹出「传输完成」悬浮横幅——自定义 RemoteViews 深色圆角卡片，走 IMPORTANCE_HIGH 静音渠道（AOSP 上 DEFAULT 不触发 heads-up）+ setAutoCancel，点击清除并回应用，未点击由系统超时收起；点击常驻通知回 launcher Activity；Android 13+ 首次发起传输前请求 `POST_NOTIFICATIONS`，拒绝仅通知不展示、不影响保活
+- 划掉应用即结束：Manifest 声明 `stopWithTask="true"`，用户从最近任务划掉时服务随 Activity 销毁，未完成上传落入「已中断」恢复口径；服务 `START_NOT_STICKY` 被系统回收后不自动重建
+
 ### 4.5 preview 模块
 
 #### 职责
