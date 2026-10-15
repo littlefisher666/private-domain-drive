@@ -24,4 +24,4 @@
 - [x] 4.1 测试桩补充 `listPrefixes`/manifest 读取支持，`flutter test` 全量通过
 - [x] 4.2 `flutter analyze` 无新增告警
 - [x] 4.3 同步 `docs/Flutter架构设计.md` 与 `docs/技术文档.md` 回收站相关描述
-- [ ] 4.4 macOS 手动走查：删除单文件/文件夹/多选、同名重复删除、文件夹钻取、恢复与立即删除
+- [x] 4.4 macOS 手动走查：删除单文件/文件夹/多选、同名重复删除、文件夹钻取、恢复与立即删除
