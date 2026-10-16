@@ -9,9 +9,10 @@
 ## 2. 发布流水线接入 OSS 镜像
 
 - [x] 2.1 在 client 仓库 `release.yml` 的 release job 新增 ossutil 安装步骤（下载 v1.7.18 linux-amd64、解压、非交互配置，二进制位于解压后版本号子目录）。验证：workflow 语法有效（可用 actionlint 或触发发布观察该步骤通过）
-- [ ] 2.2 在"生成平台更新清单"之前新增"上传 OSS 镜像"步骤：将本次发布资产上传到 `releases/<platform>/<version>/`，`--acl public-read --bigfile-threshold=10 --jobs=4`，按平台写入成功标记到 `$GITHUB_ENV`，任一失败不中断流水线。验证：触发发布后上传日志无报错、OSS 控制台可见 `releases/android/<version>/` 下公开读对象
-- [ ] 2.3 调整"生成平台更新清单"与 appcast 维护步骤的 base url 选择：镜像成功时资产 `url`/enclosure 用 `https://private-domain-drive.oss-cn-hangzhou.aliyuncs.com` 前缀，否则回退 `RELEASE_BASE_URL`；appcast item 的 `<link>` 保持 GitHub Release 页面。验证：发布产物 `update.json` 与 `appcast.xml` 新 item 中下载地址为 OSS 直链
-- [ ] 2.4 验证回退路径：临时在 client 仓库停用（或留空）`PDD_RELEASE_OSS_*` secrets 触发一次发布，确认发布正常完成、`update.json` 与 appcast 下载地址回退为 GitHub、流水线无失败标记；验证后恢复 secrets
+- [x] 2.2 在"生成平台更新清单"之前新增"上传 OSS 镜像"步骤：将本次发布资产上传到 `releases/<platform>/<version>/`，`--acl public-read --bigfile-threshold=10 --jobs=4`，按平台写入成功标记到 `$GITHUB_ENV`，任一失败不中断流水线。验证：触发发布后上传日志无报错、OSS 控制台可见 `releases/android/<version>/` 下公开读对象
+- [x] 2.3 调整"生成平台更新清单"与 appcast 维护步骤的 base url 选择：镜像成功时资产 `url`/enclosure 用 `https://private-domain-drive.oss-cn-hangzhou.aliyuncs.com` 前缀，否则回退 `RELEASE_BASE_URL`；appcast item 的 `<link>` 保持 GitHub Release 页面。验证：发布产物 `update.json` 与 `appcast.xml` 新 item 中下载地址为 OSS 直链
+- [x] 2.4 验证回退路径：临时在 client 仓库停用（或留空）`PDD_RELEASE_OSS_*` secrets 触发一次发布，确认发布正常完成、`update.json` 与 appcast 下载地址回退为 GitHub、流水线无失败标记；验证后恢复 secrets
+- [ ] 2.5 安卓镜像规避 OSS 匿名下载拦截：镜像对象以 `.bin` 命名并显式写 `Content-Type: application/octet-stream` 上传（key 含 `.apk` 或 apk 类型在默认域名匿名请求返回 400 `ApkDownloadForbidden`），清单安卓 `url` 按 `.bin` 拼装（`name`/`digest` 保持原值）；上传后对全部镜像直链做匿名探测（range 请求 200/206 才计成功，否则按镜像失败回退）。验证：下一次发布匿名下载安卓 `.bin` 全量与 GitHub 资产 SHA-256 一致且探测日志通过；v1.0.10 存量清单修复（服务端复制对象 + 清单改指 `.bin` 直链，匿名 206、摘要一致）已于 2026-10-16 完成
 
 ## 3. 文档与仓库指针同步
 
