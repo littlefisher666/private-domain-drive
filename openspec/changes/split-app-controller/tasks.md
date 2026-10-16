@@ -40,7 +40,7 @@
 ## 8. 抽取 WorkspaceController 与 SettingsController
 
 - [x] 8.1 新建 `lib/features/workspace/application/workspace_controller.dart`：目录浏览/导航/选择（含目录大小与 EXIF takenAt）/创建重命名/排序缩略图偏好/目录摘要服务代理/`sidebarDirectories`，持 `SessionController`/`OssClient`/`DirectorySummaryService`/`GalleryIndexHooks`；`AppController` 剩余公开方法全部改门面委托，验证 `flutter test` 全量通过（重点：目录浏览、多选、缩略图偏好用例）（提前实施：3.2 的 TransferController 依赖 WorkspaceController，故在组 3 之前先完成本任务）
-- [ ] 8.2 新建 `lib/features/settings/application/settings_controller.dart`：`themeMode/autoCheckUpdates/setThemeMode/setAutoCheckUpdates`、强制升级门禁（`forcedUpgradeActive/forcedUpgradeResult/checkForcedUpgradeGate` 及 `updateService` 实例持有，构造参数 `updateService/disableStartupUpdateCheck` 接入）及偏好恢复；`AppController` 门面委托，验证主题/自动检查/强制升级相关测试通过
+- [x] 8.2 新建 `lib/features/settings/application/settings_controller.dart`：`themeMode/autoCheckUpdates/setThemeMode/setAutoCheckUpdates`、强制升级门禁（`forcedUpgradeActive/forcedUpgradeResult/checkForcedUpgradeGate` 及 `updateService` 实例持有，构造参数 `updateService/disableStartupUpdateCheck` 接入）及偏好恢复；`AppController` 门面委托，验证主题/自动检查/强制升级相关测试通过
 
 ## 9. AppServices 聚合、AppScope 切换与门面拆除
 
