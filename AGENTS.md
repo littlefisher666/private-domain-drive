@@ -166,6 +166,7 @@
   - macOS：`flutter run -d macos --dart-define-from-file=../secrets/client/local.json`
   - Android：`flutter run -d android --dart-define-from-file=../secrets/client/local.json`
 - 不得使用未注入环境配置的普通 `flutter run -d macos` 或 `flutter run -d android` 作为联调启动方式；不得将环境文件中的真实凭证写入源码或提交到仓库
+- `secrets/client/local.json` 注入 `DISABLE_STARTUP_UPDATE_CHECK=true`：关闭启动静默检查与强制升级门禁（本地构建版本固定，会被任何真实门槛拦截）。如需本地验证强制升级拦截页，临时移除该注入并对齐门槛（详见 `docs/技术文档.md` 17.6）
 
 ### 服务端约束
 
