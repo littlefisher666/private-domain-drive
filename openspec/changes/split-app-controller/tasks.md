@@ -20,7 +20,7 @@
 
 ## 4. 抽取 ShareImportController
 
-- [ ] 4.1 新建 `lib/features/share_import/domain/share_import_models.dart`（迁出 `ShareImportItem/ShareImportCompleteBatch/ShareImportBatchState`）与 `lib/features/share_import/application/share_import_controller.dart`：批次状态与 `prepareShareImport/beginShareImportBatch/addShareImportItem/finishShareImportBatch/addCompletedShareBatch/setShareTargetPath/confirmShareUpload`，持 `TransferController`/`WorkspaceController`/`SessionController`；`AppController` 门面委托，验证 `flutter test` 全量通过
+- [x] 4.1 新建 `lib/features/share_import/domain/share_import_models.dart`（迁出 `ShareImportItem/ShareImportCompleteBatch/ShareImportBatchState`）与 `lib/features/share_import/application/share_import_controller.dart`：批次状态与 `prepareShareImport/beginShareImportBatch/addShareImportItem/finishShareImportBatch/addCompletedShareBatch/setShareTargetPath/confirmShareUpload`，持 `TransferController`/`WorkspaceController`/`SessionController`；`AppController` 门面委托，验证 `flutter test` 全量通过
 - [ ] 4.2 新建 `test/share_import_controller_test.dart`，迁入分享导入域测试（批次渐进接收、多文件同批次上传）并直测新控制器，验证原断言不变
 
 ## 5. 抽取 MoveController
