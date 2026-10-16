@@ -2,13 +2,13 @@
 
 ## 1. 发布镜像凭证准备
 
-- [ ] 1.1 在阿里云 RAM 控制台创建 `pdd-release-oss` 用户与 AccessKey，配置策略仅授权 `private-domain-drive` 桶 `releases/` 前缀的 `PutObject`/`GetObject`/`DeleteObject`。验证：用该密钥本地 ossutil 上传对象到 `releases/` 前缀成功、上传到 `shared/` 前缀返回 AccessDenied
-- [ ] 1.2 在 client 仓库 Settings → Secrets 添加 `PDD_RELEASE_OSS_ACCESS_KEY_ID` 与 `PDD_RELEASE_OSS_ACCESS_KEY_SECRET`。验证：`gh secret list -R littlefisher666/private-domain-drive-client` 可见两个新条目
-- [ ] 1.3 将新密钥备份到主仓库 `secrets/github-actions-secrets.env` 并提交（git-crypt 加密）。验证：`git status` 显示该文件为密文状态、提交中不含明文密钥
+- [x] 1.1 在阿里云 RAM 控制台创建 `pdd-release-oss` 用户与 AccessKey，配置策略仅授权 `private-domain-drive` 桶 `releases/` 前缀的 `PutObject`/`GetObject`/`DeleteObject`。验证：用该密钥本地 ossutil 上传对象到 `releases/` 前缀成功、上传到 `shared/` 前缀返回 AccessDenied
+- [x] 1.2 在 client 仓库 Settings → Secrets 添加 `PDD_RELEASE_OSS_ACCESS_KEY_ID` 与 `PDD_RELEASE_OSS_ACCESS_KEY_SECRET`。验证：`gh secret list -R littlefisher666/private-domain-drive-client` 可见两个新条目
+- [x] 1.3 将新密钥备份到主仓库 `secrets/github-actions-secrets.env` 并提交（git-crypt 加密）。验证：`git status` 显示该文件为密文状态、提交中不含明文密钥
 
 ## 2. 发布流水线接入 OSS 镜像
 
-- [ ] 2.1 在 client 仓库 `release.yml` 的 release job 新增 ossutil 安装步骤（下载 v1.7.18 linux-amd64、解压、非交互配置，二进制位于解压后版本号子目录）。验证：workflow 语法有效（可用 actionlint 或触发发布观察该步骤通过）
+- [x] 2.1 在 client 仓库 `release.yml` 的 release job 新增 ossutil 安装步骤（下载 v1.7.18 linux-amd64、解压、非交互配置，二进制位于解压后版本号子目录）。验证：workflow 语法有效（可用 actionlint 或触发发布观察该步骤通过）
 - [ ] 2.2 在"生成平台更新清单"之前新增"上传 OSS 镜像"步骤：将本次发布资产上传到 `releases/<platform>/<version>/`，`--acl public-read --bigfile-threshold=10 --jobs=4`，按平台写入成功标记到 `$GITHUB_ENV`，任一失败不中断流水线。验证：触发发布后上传日志无报错、OSS 控制台可见 `releases/android/<version>/` 下公开读对象
 - [ ] 2.3 调整"生成平台更新清单"与 appcast 维护步骤的 base url 选择：镜像成功时资产 `url`/enclosure 用 `https://private-domain-drive.oss-cn-hangzhou.aliyuncs.com` 前缀，否则回退 `RELEASE_BASE_URL`；appcast item 的 `<link>` 保持 GitHub Release 页面。验证：发布产物 `update.json` 与 `appcast.xml` 新 item 中下载地址为 OSS 直链
 - [ ] 2.4 验证回退路径：临时在 client 仓库停用（或留空）`PDD_RELEASE_OSS_*` secrets 触发一次发布，确认发布正常完成、`update.json` 与 appcast 下载地址回退为 GitHub、流水线无失败标记；验证后恢复 secrets
