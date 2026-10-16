@@ -44,7 +44,7 @@
 
 ## 9. AppServices 聚合、AppScope 切换与门面拆除
 
-- [ ] 9.1 新建 `lib/shared/state/app_services.dart`：持有全部控制器、订阅并转发通知、统一 `bootstrap()`（偏好/传输恢复 → 会话恢复 → 工作区重置）；重写 `lib/app/bootstrap/app_bootstrap.dart` 装配全部依赖与钩子（含 `UpdateService` 注入 SettingsController），验证 `flutter analyze` 通过
+- [x] 9.1 新建 `lib/shared/state/app_services.dart`：持有全部控制器、订阅并转发通知、统一 `bootstrap()`（偏好/传输恢复 → 会话恢复 → 工作区重置）；重写 `lib/app/bootstrap/app_bootstrap.dart` 装配全部依赖与钩子（含 `UpdateService` 注入 SettingsController），验证 `flutter analyze` 通过
 - [ ] 9.2 `lib/shared/state/app_scope.dart` 改为 `InheritedNotifier<AppServices>`；迁移 12 个 UI 文件的全部调用点（workspace_page 32 处、recycle_bin_page、transfer_tasks_page、gallery_viewer_page、preview_page、settings_page、forced_upgrade_page 3 处、login/splash/change_password、share_target_dialog、home_shell、app.dart、main.dart、file_repository、gallery_controller 改为持新控制器）；删除 `app_controller.dart` 门面，验证 `flutter analyze` + `flutter test` 全量通过
 - [ ] 9.3 拆分剩余 `app_controller_test.dart`（1303 行，工作区浏览/选择/回收站/别名相关用例）为 `test/workspace_controller_test.dart`、`test/alias_controller_test.dart`、`test/settings_controller_test.dart` 并直测新控制器；`forced_upgrade_widget_test.dart` 改经 AppServices 装配（门禁断言不变），删除旧测试文件，验证全量测试通过且覆盖不减少
 
