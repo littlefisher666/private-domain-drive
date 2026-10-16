@@ -22,7 +22,7 @@
 ## 4. 端到端验证
 
 - [x] 4.1 触发一次 `both` 发布，验证：两个平台的 OSS 对象存在且无需凭证 curl 返回 200、`update.json` 与 appcast 下载地址为 OSS 直链、国内网络实测下载速度明显优于 GitHub 直连。（2026-10-16 完成：run 38841282644 发布 android/v1.0.11、macos/v1.0.15，安卓按 `.bin` 口径匿名下载 200、macOS dmg/zip 206，清单与 appcast 均为 OSS 直链；OSS 实测约 5–10 MB/s，GitHub 直连 30s 超时不可用）
-- [ ] 4.2 Android 端验证：用新发布版本触发应用内更新，确认 APK 从 OSS 直链下载、SHA-256 校验通过并可安装
+- [x] 4.2 Android 端验证：用新发布版本触发应用内更新，确认 APK 从 OSS 直链下载、SHA-256 校验通过并可安装。（2026-10-16 完成：真机在旧版本内通过设置页应用内更新至 1.0.12 成功；更新时刻可获取的最新清单（GitHub Release 附带资产）中安卓 url 即 OSS `.bin` 直链，下载后由客户端校验 SHA-256 再安装；独立复核：匿名下载 OSS `.bin` 与 GitHub 清单 digest 逐字节一致，`sha256:942f5ec3…`）
 - [ ] 4.3 macOS 端验证：用新发布版本触发 Sparkle 更新，确认更新包从 OSS 直链下载、EdDSA 校验通过并完成替换
 
 ## Workflow follow-up
