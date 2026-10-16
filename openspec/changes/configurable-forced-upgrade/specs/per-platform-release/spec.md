@@ -4,12 +4,12 @@
 
 ### Requirement: 按平台拆分发布产物
 
-每个平台 Release SHALL 只包含该平台的发布资产与清单：Android Release SHALL 包含 `private-domain-drive-android-vX.Y.Z.apk`，macOS Release SHALL 包含 `private-domain-drive-macos-vX.Y.Z.dmg` 与 Sparkle 更新包 `private-domain-drive-macos-vX.Y.Z.zip`；各 Release 附带的 `private-domain-drive-update.json` SHALL 包含 `version`（该平台版本）、该平台一个资产字段与 `minSupportedVersion`（最低支持版本，缺省或为空表示不限制）。
+每个平台 Release SHALL 只包含该平台的发布资产与清单：Android Release SHALL 包含 `private-domain-drive-android-vX.Y.Z.apk`，macOS Release SHALL 包含 `private-domain-drive-macos-vX.Y.Z.dmg` 与 Sparkle 更新包 `private-domain-drive-macos-vX.Y.Z.zip`；各 Release 附带的 `private-domain-drive-update.json` SHALL 包含 `version`（该平台版本）、该平台一个资产字段与 `minSupportedVersion`（最低支持版本，缺省或为空表示不限制）。GitHub Release SHALL 继续挂载原始资产作归档与手动下载兜底；清单中资产的下载地址 SHALL 指向 OSS 发布镜像直链，镜像不可用时回退 GitHub Release 下载地址。
 
 #### Scenario: Android Release 清单结构
 
 - **WHEN** Android 平台 Release 创建完成
-- **THEN** 其 update.json 的 `assets` SHALL 仅含 `android` 字段，且 `version` 等于该平台 tag 的版本号
+- **THEN** 其 update.json 的 `assets` SHALL 仅含 `android` 字段，且 `version` 等于该平台 tag 的版本号，资产 `url` SHALL 为 OSS 镜像直链或回退的 GitHub Release 下载地址
 
 #### Scenario: macOS Release 资产结构
 

@@ -4,8 +4,8 @@
 
 见 proposal.md「Why」。设计相关的现状约束：
 
-- 现有更新链路：Android 由 `client/lib/features/settings/application/update_service.dart` 读取 GitHub Latest Release 附带的 `private-domain-drive-update.json`（经 `github_release_client.dart` 拉取，10 秒超时、Android 走系统代理）；macOS 由 Sparkle 从 appcast 检查与安装（`macos_sparkle_updater.dart`）。macOS 与 Android 均已具备语义化版本比较（`core/version/app_version.dart`）。
-- 更新清单由发布流水线按平台生成（`client/.github/workflows/release.yml` 的「生成平台更新清单」步骤，jq 构造，每个平台 Release 各挂一份）。
+- 现有更新链路：Android 由 `client/lib/features/settings/application/update_service.dart` 读取本平台更新清单——优先 OSS 固定路径 `releases/<platform>/update.json`（5 秒超时），不可用时回退 GitHub Releases 列表（经 `github_release_client.dart` 拉取，10 秒超时、Android 走系统代理）；macOS 由 Sparkle 从 appcast 检查与安装（feed 探测优先 OSS、回退 GitHub，`macos_sparkle_updater.dart`）。macOS 与 Android 均已具备语义化版本比较（`core/version/app_version.dart`）。
+- 更新清单由发布流水线按平台生成（`client/.github/workflows/release.yml` 的「生成平台更新清单」步骤，jq 构造，每个平台 Release 各挂一份，并覆盖上传至 OSS 固定路径 `releases/<platform>/update.json`）。
 - 归档设计（2026-09-14 add-release-updates）此前明确排除强制更新；本次变更将其引入，并把 macOS 对清单的使用限定为门禁判定（更新交付仍走 Sparkle）。
 - 启动链路：`main()` → `AppBootstrap.initialize()`（本地恢复会话，不请求服务端）→ `runApp` → Splash 350ms 后按登录态分流；macOS 在 `main.dart` 中已有一个不阻塞的 Sparkle 静默检查先例。
 - 本地开发构建使用 `pubspec.yaml` 的固定版本 `0.0.1+1`（CI 用 `--build-name/--build-number` 覆盖），因此任何真实的最低支持版本都会把本地构建判定为强制升级，需要调试开关兜底。
@@ -84,7 +84,7 @@
 
 ## Risks / Trade-offs
 
-- [启动检查引入 GitHub 可达性依赖（国内网络）] → 检查静默、失败无感、不阻塞启动；清单本身仍走 GitHub 是既有事实（OSS 镜像变更只覆盖大文件下载），可接受。
+- [启动检查引入远端清单依赖（国内网络）] → 检查静默、失败无感、不阻塞启动；清单发现已随 OSS 更新发现链路改为 OSS 固定路径优先、GitHub 回退（OSS 中断自动回退，两者均不可达时静默放行），可接受。
 - [门槛配置错误导致大面积拦截] → 流水线校验门槛不高于本次版本，保证升级后必然放行；拦截页始终可用（升级/重试/退出）；应急可通过重传清单置空字段恢复。
 - [可选发布意外抹掉已有门槛] → 流水线默认沿用上一版同平台门槛；仅显式输入可下调。
 - [用户长期离线或使用旧版本不升级] → 放行是已确认的取舍；致命问题场景依赖用户联网后于下次启动被拦截。

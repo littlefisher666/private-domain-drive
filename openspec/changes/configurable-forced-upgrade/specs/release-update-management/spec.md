@@ -4,21 +4,31 @@
 
 ### Requirement: 检查静态更新清单
 
-Android 客户端 SHALL 通过 GitHub Releases 列表接口查询发布记录，在 tag 匹配 `android/` 前缀的发布中选取版本号最高的一个（不依赖接口返回顺序），读取该 Release 附带的 `private-domain-drive-update.json`，并只在清单产品版本高于当前版本且存在 Android 资产时提示更新；macOS 客户端的更新检查与交付由 Sparkle 能力承担，SHALL NOT 通过静态更新清单提示或交付更新，但两端 SHALL 读取本平台清单用于最低支持版本门禁判定（见 forced-upgrade-gate 能力）。
+Android 客户端 SHALL 优先从 OSS 发布目录固定路径 `releases/android/update.json` 获取静态更新清单；OSS 清单请求失败（网络错误、超时、状态码非 200、内容无法解析）时 SHALL 回退为通过 GitHub Releases 列表接口查询发布记录，在 tag 匹配 `android/` 前缀的发布中选取版本号最高的一个（不依赖接口返回顺序），读取该 Release 附带的 `private-domain-drive-update.json`，并只在清单产品版本高于当前版本且存在 Android 资产时提示更新；macOS 客户端 SHALL NOT 通过静态更新清单检查或交付更新，其更新检查由 Sparkle 能力承担；两端 SHALL 读取本平台更新清单的 `minSupportedVersion` 用于最低支持版本门禁判定（见 forced-upgrade-gate 能力），macOS 端的门禁读取沿用 OSS 固定路径优先、不可用时回退 GitHub 链路的发现方式。
+
+#### Scenario: OSS 清单优先命中
+
+- **WHEN** Android 客户端检查更新且 OSS 固定路径清单成功返回
+- **THEN** 客户端 SHALL 直接以该清单作为本次检查依据，SHALL NOT 查询 GitHub Releases 列表
+
+#### Scenario: OSS 清单不可用时回退
+
+- **WHEN** OSS 清单请求网络错误、超时、状态码非 200 或内容无法解析
+- **THEN** 客户端 SHALL 转入 GitHub Releases 列表回退链路完成本次检查；仅当回退链路同样失败时 SHALL 按检查失败处理
 
 #### Scenario: 发现当前平台的新版本
 
-- **WHEN** Android 客户端检查更新，且 Android 版本号最高的 Release 清单版本高于当前版本并包含 Android 资产
+- **WHEN** Android 客户端检查更新，且获取到的清单产品版本高于当前版本并包含 Android 资产
 - **THEN** 客户端 SHALL 展示远端版本与更新操作；清单未提供更新说明时 SHALL 展示“暂无更新说明”
 
 #### Scenario: 当前已是最新版本
 
-- **WHEN** 当前平台版本号最高的 Release 清单版本不高于当前版本
+- **WHEN** 客户端获取到的当前平台清单版本不高于当前版本
 - **THEN** 客户端 SHALL 提示已是最新版本
 
 #### Scenario: 另一端单独发版
 
-- **WHEN** 当前平台版本号最高的 Release 版本不高于当前版本，而其他平台存在版本号更高的 Release
+- **WHEN** 当前平台清单版本不高于当前版本，而其他平台存在版本号更高的发布
 - **THEN** 客户端 SHALL 不提示更新
 
 #### Scenario: 当前平台缺少资产
@@ -34,7 +44,7 @@ Android 客户端 SHALL 通过 GitHub Releases 列表接口查询发布记录，
 #### Scenario: macOS 读取清单仅用于门禁
 
 - **WHEN** macOS 客户端执行启动静默检查
-- **THEN** 客户端 SHALL 读取本平台清单的 `minSupportedVersion` 用于门禁判定，SHALL NOT 据此触发 Sparkle 链路之外的更新提示或更新交付
+- **THEN** 客户端 SHALL 读取本平台更新清单的 `minSupportedVersion` 用于门禁判定，SHALL NOT 据此触发 Sparkle 链路之外的更新提示或更新交付
 
 ## ADDED Requirements
 
