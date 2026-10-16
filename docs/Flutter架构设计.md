@@ -32,7 +32,7 @@
 - **云端鉴权兜底**：客户端只做能力展示与交互收敛，最终权限以 OSS / STS 为准。
 - **文件流量不经业务后端**：上传下载预览直连 OSS；FC 只负责鉴权、STS 与配置下发。
 - **按 feature 组织，按分层落地**：模块按业务能力拆分，模块内部统一 `presentation / application / domain / infrastructure`。
-- **与现有骨架对齐**：优先在当前客户端工程骨架上迭代，不另起一套目录体系。
+- **与现有工程对齐**：优先在当前客户端工程上迭代，不另起一套目录体系。
 
 ## 2. 架构定位
 
@@ -94,7 +94,7 @@ OSS 平台差异收敛在本地 Flutter 插件 `packages/private_domain_oss/`：
 
 ## 3. 目录结构
 
-与当前 `private-domain-drive-client/lib` 骨架保持一致，建议结构如下：
+与当前 `private-domain-drive-client/lib` 实际结构一致：
 
 ```text
 lib/
@@ -102,82 +102,116 @@ lib/
   app/
     app.dart
     bootstrap/
-      app_bootstrap.dart
+      app_bootstrap.dart      # 装配层：创建 AppServices、注入 GalleryIndexHooks 与全局 navigatorKey
     router/
       app_router.dart
       route_names.dart
     theme/
       app_theme.dart
+      cupertino_desktop.dart
   core/
-    constants/
-    errors/
-    network/
-    utils/
+    constants/                # app_constants.dart
+    errors/                   # app_error.dart（AppError 类型化错误模型）
+    network/                  # api_client.dart、aliyun_request_signer.dart（FC 调用）
+    utils/                    # download_directory.dart、file_size_formatter.dart、window_actions.dart
+    version/                  # app_version.dart
   features/
     auth/
-      application/
-      domain/
-      infrastructure/
-      presentation/
+      application/            # SessionController、BootstrapSessionUseCase
+      domain/                 # UserSession、LoginResult
+      infrastructure/         # SessionRepository、SecureSessionStore、SavedCredentialsStore
+      presentation/           # SplashPage、LoginPage、ChangePasswordPage
     workspace/
-      application/
-      domain/
-      infrastructure/
-      presentation/
+      application/            # WorkspaceController、AliasController、RecycleBinController、MoveController、LoadDirectoryUseCase
+      domain/                 # FileItem、DirectorySummary、MoveModels、MoveTaskEntry、DeleteModels、RecycleBinEntry、DirectoryAlias
+      infrastructure/         # OssClient（listing/media/transfer 三个 part）、FileRepository、AliasRepository、DirectorySummaryService、DirectorySummaryCache
+      presentation/           # HomeShell、WorkspacePage（actions/build 两个 part）、RecycleBinPage、目录/别名对话框、widgets/
     transfer/
-      application/
-      domain/
-      infrastructure/
-      presentation/
+      application/            # TransferController、TransferQueue（非 ChangeNotifier 纯 Dart 队列类）
+      domain/                 # TransferTask、TransferEnqueue
+      infrastructure/         # UploadStaging
+      presentation/           # TransferTasksPage（build part）、widgets/
     preview/
-      application/
-      domain/
-      infrastructure/
-      presentation/
+      domain/                 # PreviewType
+      infrastructure/         # TextPreviewLoader
+      presentation/           # PreviewPage 与图片/PDF/文本/CSV/Markdown/音频预览 body
     gallery/
-      application/           # GalleryController（相册状态与流程编排）
-      domain/                # PhotoEntry / PhotoManifest / GalleryConfig
-      infrastructure/        # 照片索引仓库、SQLite 元数据库、原图缓存、媒体/剪贴板桥
-      presentation/          # 相册时间线页、大图查看器、GalleryScope
-    share_import/          # Android 系统分享，可先挂在 transfer/workspace 下，后续独立
-      application/
-      domain/
-      infrastructure/
-      presentation/
+      application/            # GalleryController（含 gallery_controller_hooks part）
+      domain/                 # PhotoEntry、PhotoManifest、GalleryConfig、TimelineGroup、PhotoDateHints
+      infrastructure/         # PhotoIndexRepository、PhotoScanner、GalleryDatabase、OriginalCacheStore、MediaBridge
+      presentation/           # GalleryPage、GalleryViewerPage、GalleryScope、widgets/
+    share_import/
+      application/            # ShareImportController
+      domain/                 # ShareImportModels
+      infrastructure/         # AndroidShareImportBridge
+      presentation/           # ShareTargetDialog
     settings/
-      application/
-      domain/
-      infrastructure/
-      presentation/
+      application/            # SettingsController、UpdateService
+      infrastructure/         # GithubReleaseClient、ApkDownloader、AndroidUpdateInstaller、MacosSparkleUpdater、SystemProxy
+      presentation/           # SettingsPage、ForcedUpgradePage
   shared/
-    models/
-    providers/
-    widgets/
-  platform/                # 建议新增：平台差异适配
-    file_picker/
-    drag_drop/
-    share_receiver/
-    path_provider/
+    state/                    # AppServices（控制器聚合）、AppScope（InheritedNotifier）
+    cache/                    # DiskImageCache、DiskDocumentCache
+    widgets/                  # AppFeedback、FileIcon、FileSortSheet
+    gallery_index_hooks.dart  # 相册索引跨 feature 集成契约
+    transfer_keepalive.dart   # Android 传输前台保活抽象与平台分支工厂
+    path_utils.dart           # rootPrefix 等纯路径工具顶层函数
+    file_size_formatter_lite.dart
 ```
+
+OSS 平台差异收敛在本地 Flutter 插件 `packages/private_domain_oss/`（见 2.2 节）。平台差异不设独立 `platform/` 顶层目录，其余平台能力按归属收敛在 feature 各层（如 `AndroidShareImportBridge`、`MacosSparkleUpdater`、`UploadStaging`）与 `core/utils`、`shared`（`TransferKeepaliveService`、`WindowActions`、`DownloadDirectory`）。
 
 ### 3.1 顶层目录职责
 
 | 目录 | 职责 |
 | --- | --- |
-| `app/` | App 入口组装、主题、路由、启动初始化 |
+| `app/` | App 入口组装、主题、路由、启动装配（`AppBootstrap`） |
 | `core/` | 跨 feature 的基础能力：错误模型、常量、HTTP 封装、通用工具 |
 | `features/` | 业务功能模块，每个模块自包含分层 |
-| `shared/` | 跨模块复用的轻量组件、Provider、DTO/视图模型 |
-| `platform/` | 平台能力抽象与实现（Android / macOS） |
+| `shared/` | 跨模块复用的状态聚合层（`state/`）、缓存（`cache/`）、通用组件（`widgets/`）与纯工具 |
 
 ### 3.2 feature 内部分层职责
 
 | 层级 | 放什么 | 不放什么 |
 | --- | --- | --- |
-| `presentation` | Page、Widget、Controller/Notifier、表单与交互状态 | OSS/FC 细节、复杂业务规则 |
-| `application` | UseCase / Service 编排，跨仓库流程 | Widget、平台 API |
-| `domain` | 实体、枚举、能力模型、纯规则 | Flutter、网络库、SDK |
-| `infrastructure` | Repository 实现、SDK 封装、DTO 映射 | 页面逻辑 |
+| `presentation` | Page、Widget、页面级交互状态 | OSS/FC 细节、复杂业务规则 |
+| `application` | Controller / UseCase 编排（状态控制器归属本层） | Widget、平台 API |
+| `domain` | 实体、枚举、能力模型、纯规则、控制器配套领域模型 | Flutter、网络库、SDK |
+| `infrastructure` | Repository 实现、SDK 封装、平台桥接、DTO 映射 | 页面逻辑 |
+
+### 3.3 presentation/widgets 约定
+
+页面文件的子组件独立成文件放入同 feature 的 `presentation/widgets/`（如 `workspace/presentation/widgets/`、`gallery/presentation/widgets/`、`transfer/presentation/widgets/`）：
+
+- 页面私有子组件搬迁后以文件为边界独立存在，跨文件引用的组件去下划线小范围公开，仅 `widgets/` 目录内互引，不扩大对外 API 面
+- 页面主文件保留页面类与页面 State（生命周期、导航、路由参数），通过组合 widgets 目录组件搭建页面
+
+### 3.4 part 文件约定
+
+同一类或同一个 State 按关注点物理切分时使用 Dart `part` 文件（保持库内私有访问，公开 API 不变）：
+
+- `workspace_page.dart` → `workspace_page_actions.dart`（操作处理器：新建/重命名/删除/别名/下载/移动/上传弹窗）、`workspace_page_build.dart`（build 构建与摘要辅助）
+- `transfer_tasks_page.dart` → `transfer_tasks_page_build.dart`（build 辅助与详情格式化）
+- `oss_client.dart` → `oss_client_listing.dart`（目录列举与统计）、`oss_client_media.dart`（缩略图/预览/视频截帧/EXIF）、`oss_client_transfer.dart`（上传/下载/流式/copy/deleteMany/cancelTransfer）；`OssClient` 用 part 切分保持同一类，方法间动态派发与调用点零改动
+- `gallery_controller.dart` → `gallery_controller_hooks.dart`（`GalleryIndexHooks` 实现方法）
+- `workspace_controller.dart` → `workspace_controller_listing.dart`（目录列举与摘要）、`workspace_controller_media.dart`（媒体加载）、`workspace_controller_selection.dart`（选择与目录大小）
+- `transfer_controller.dart` → `transfer_controller_uploads.dart`（上传闭环与冲突对话框）、`transfer_controller_downloads.dart`（下载入队）
+
+控制器的 part 一律采用 mixin 组合（如 `OssClient`、`WorkspaceController`、`TransferController`），方法保持类的真实实例成员，动态派发与方法 tear-off 行为不变。
+
+`part` 只解决物理文件体积约束，真正的职责收敛由控制器拆分承担；如后续需要真正独立类，可在 part 基础上演进。
+
+### 3.5 单文件行数约束
+
+单文件 ≤ 800 行是本仓库的持续性约束。超限时的拆分手法按优先级：
+
+1. 抽独立类（控制器、协作类，如 `PhotoScanner` 承载全量扫描与缩略图回填）
+2. 子组件搬入 `presentation/widgets/`
+3. 同一类/State 无法抽类时用 `part` 文件按关注点切分
+
+### 3.6 测试文件组织
+
+测试文件平铺在 `test/` 下，按控制器直测：`session_controller_test.dart`、`workspace_controller_test.dart`、`move_controller_test.dart`、`recycle_bin_controller_test.dart`、`transfer_controller_test.dart`、`share_import_controller_test.dart`、`settings_controller_test.dart` 等，直接构造被测控制器与其依赖，不经 `AppServices` 聚合层；需要验证装配链路的用例（如强制升级门禁 widget 测试）经真实 `AppServices` 装配执行。
 
 ## 4. 功能模块设计
 
@@ -333,7 +367,7 @@ enum BrowseMode { list, grid }
 
 #### 关键模型
 
-与现有骨架对齐并扩展：
+与现有实现对齐并扩展：
 
 ```dart
 enum TransferTaskStatus { pending, running, success, failed, canceled, interrupted }
@@ -397,9 +431,9 @@ class TransferTask {
 
 - 平台适配层：`lib/shared/transfer_keepalive.dart` 提供 `TransferKeepaliveService` 抽象（`sync(active, summary)` 幂等启停 + `requestNotificationPermissionIfNeeded`）与平台分支工厂；`Platform.isAndroid` 判断收敛在工厂内，macOS 为 no-op，传输编排逻辑零感知
 - 原生实现：自研 Kotlin `TransferKeepaliveService`（dataSync 前台服务，仅「保活进程 + 挂通知」单一职责，无业务逻辑），经 MethodChannel `private_domain_drive/transfer_keepalive` 暴露 start/update/stop/requestNotificationPermission；传输执行仍完整留在 Flutter 主 isolate
-- 启停时机：`AppController` 在队列状态变化点（入队、任务启动、任务终态、取消及运行集收敛后）计算活跃状态（进行中或等待中任务非空）与进度摘要（剩余任务数、总字节进度百分比）推送；由空闲转活跃启动服务，活跃转空闲立即停止
+- 启停时机：`TransferQueue` 在队列状态变化点（入队、任务启动、任务终态、取消及运行集收敛后）计算活跃状态（进行中或等待中任务非空）与进度摘要（剩余任务数、总字节进度百分比）推送；由空闲转活跃启动服务，活跃转空闲立即停止
 - 进度节流：通知更新最短间隔 1 秒且内容变化才刷新（时钟可注入便于单测），活跃状态切换不节流
-- 通知样式：进行中常驻通知在 Android 16+ 用 `Notification.ProgressStyle`（Live Updates API）发送——ColorOS 16 流体云将其渲染为刘海位置胶囊，展示「已完成 X/N · Y%」，低版本回退系统标准文字样式，均走 IMPORTANCE_DEFAULT 静音渠道（`setSound(null, null)`；ColorOS 等 ROM 不为 IMPORTANCE_LOW 渠道渲染状态栏图标）；批次计数由 `AppController` 维护（空闲转活跃归零、任务终态累计已完成、新增任务扩容批次总数）；队列由活跃转空闲时停止服务并弹出「传输完成」悬浮横幅——自定义 RemoteViews 深色圆角卡片，走 IMPORTANCE_HIGH 静音渠道（AOSP 上 DEFAULT 不触发 heads-up）+ setAutoCancel，点击清除并回应用，未点击由系统超时收起；点击常驻通知回 launcher Activity；Android 13+ 首次发起传输前请求 `POST_NOTIFICATIONS`，拒绝仅通知不展示、不影响保活
+- 通知样式：进行中常驻通知在 Android 16+ 用 `Notification.ProgressStyle`（Live Updates API）发送——ColorOS 16 流体云将其渲染为刘海位置胶囊，展示「已完成 X/N · Y%」，低版本回退系统标准文字样式，均走 IMPORTANCE_DEFAULT 静音渠道（`setSound(null, null)`；ColorOS 等 ROM 不为 IMPORTANCE_LOW 渠道渲染状态栏图标）；批次计数由 `TransferQueue` 维护（空闲转活跃归零、任务终态累计已完成、新增任务扩容批次总数）；队列由活跃转空闲时停止服务并弹出「传输完成」悬浮横幅——自定义 RemoteViews 深色圆角卡片，走 IMPORTANCE_HIGH 静音渠道（AOSP 上 DEFAULT 不触发 heads-up）+ setAutoCancel，点击清除并回应用，未点击由系统超时收起；点击常驻通知回 launcher Activity；Android 13+ 首次发起传输前请求 `POST_NOTIFICATIONS`，拒绝仅通知不展示、不影响保活
 - 划掉应用即结束：Manifest 声明 `stopWithTask="true"`，用户从最近任务划掉时服务随 Activity 销毁，未完成上传落入「已中断」恢复口径；服务 `START_NOT_STICKY` 被系统回收后不自动重建
 
 ### 4.5 preview 模块
@@ -442,11 +476,11 @@ class TransferTask {
    UUID `batchId` 与成功/失败计数）经 EventChannel 推送：每个文件复制成功
    即逐项推送；复制失败的单项跳过，失败数在 `batch_done` 中体现
 4. Dart 侧（`AndroidShareImportBridge`）解析信封事件为类型化对象，未知
-   事件类型忽略并打日志；`AppController` 以
+   事件类型忽略并打日志；`ShareImportController` 以
    `beginShareImportBatch` / `addShareImportItem` / `finishShareImportBatch`
    渐进接收，批次完成后并入待上传清单
 5. 冷启动兜底：eventSink 未监听时原生端缓冲事件，`onListen` 按序冲刷；
-   `takePendingItems` 返回缓冲中已完整的批次，由 `AppController` 转为
+   `takePendingItems` 返回缓冲中已完整的批次，由 `ShareImportController` 转为
    「立即完成」的批次并入
 6. 若未登录或会话失效，先走 auth 恢复（批次照常渐进接收）
 7. 目录选择弹窗可先于复制完成弹出：批次未完成时展示「正在导入 x/n」并
@@ -498,59 +532,90 @@ class TransferTask {
 - 内部对象统一收敛在 `.gallery/` 点前缀目录下（避免与用户自建目录撞名）；文件浏览统一隐藏所有点前缀条目（含回收站 `.trash/`、别名表 `.aliases/`、`.DS_Store` 等），文件夹统计同样不计入，目录级删除/回收操作仍处理全部对象（`OssClient.list` 过滤）
 - macOS 端不提供分享能力，Android 保留系统分享
 
-## 5. 应用层与依赖管理
+## 5. 应用层与状态管理
 
-### 5.1 启动流程
+### 5.1 启动流程与装配
 
 ```mermaid
 sequenceDiagram
     participant Main as main.dart
     participant Boot as AppBootstrap
-    participant Auth as AuthModule
+    participant Services as AppServices
+    participant Session as SessionController
     participant Router as AppRouter
-    participant WS as Workspace
 
     Main->>Boot: initialize()
-    Boot->>Boot: 初始化日志/本地存储/DI
-    Boot->>Auth: 尝试恢复会话
+    Boot->>Services: 构造（创建 OssClient 注入全部控制器、挂接凭证失效回调与会话钩子）
+    Boot->>Services: setGalleryHooks(GalleryController)
+    Boot->>Services: bootstrap()
+    Services->>Services: 恢复偏好 / 传输历史与未完成上传
+    Services->>Session: bootstrap() 恢复会话
+    Session-->>Services: 会话有效 → 工作区据会话重置
+    Main->>Main: runApp + checkForcedUpgradeGate()
     alt 会话有效
-        Auth-->>Router: 进入 workspace
-        Router->>WS: 加载 rootPrefix 列表
+        Router->>Router: 进入 workspace，加载 rootPrefix 列表
     else 会话无效
-        Auth-->>Router: 进入 login
+        Router->>Router: 进入 login
     end
 ```
 
-### 5.2 依赖注入建议
+### 5.2 状态层与控制器职责
 
-一期建议使用轻量方案，优先：
+状态管理不引入第三方框架，使用 `ChangeNotifier` + `InheritedNotifier`：
 
-- `Riverpod`（推荐）：适合会话、目录、任务流等可观察状态
-- 或项目已存在的最小 Service Locator
+- `AppServices`（`lib/shared/state/app_services.dart`）：应用控制器聚合层（`ChangeNotifier`），持有全部控制器引用，订阅各子控制器并转发 `notifyListeners`（`TransferQueue` 非 `ChangeNotifier`，经 `ValueNotifier` 对外暴露状态、不参与监听链）；统一生命周期入口 `bootstrap()`（偏好/传输恢复 → 会话恢复 → 工作区重置）与跨域会话钩子编排（`beforeSessionCleared`：取消运行中传输、清空冲突决策；`onSessionChanged`：工作区与分享导入状态复位）
+- `AppScope`（`lib/shared/state/app_scope.dart`）：`InheritedNotifier<AppServices>`，UI 统一经 `AppScope.of(context).xxxController.xxx` 访问；细粒度刷新仍走各控制器内 `ValueNotifier`（`tasksListenable`、`selectedItemListenable`、`moveStateListenable` 等），聚合转发不带来可感知重建开销
+
+各域控制器归属对应 feature 的 application 层：
+
+| 控制器 | 位置 | 职责 |
+| --- | --- | --- |
+| `SessionController` | `features/auth/application` | 登录/登出/改密、会话恢复、凭证失效处理、会话生命周期装配钩子 |
+| `WorkspaceController` | `features/workspace/application` | 目录浏览、导航、多选、创建重命名、排序/缩略图偏好、目录统计 |
+| `AliasController` | `features/workspace/application` | 目录别名创建/打开/重命名/删除 |
+| `RecycleBinController` | `features/workspace/application` | 删除与回收站（删除预览、批量删除、还原、彻底删除、失败重试）与回收站导航状态 |
+| `MoveController` | `features/workspace/application` | 移动编排（冲突处置、manifest 记录、继续/撤销） |
+| `TransferQueue` | `features/transfer/application` | 非 `ChangeNotifier` 纯 Dart 队列类：任务表、并发调度、keepalive 同步、传输历史与未完成上传持久化 |
+| `TransferController` | `features/transfer/application` | 上传/下载入队、同名冲突对话框、重试/继续/放弃/取消/暂停等任务操作 |
+| `ShareImportController` | `features/share_import/application` | Android 分享批次渐进接收与确认上传 |
+| `SettingsController` | `features/settings/application` | 主题与自动检查更新偏好、强制升级门禁（`forcedUpgradeActive`/`checkForcedUpgradeGate`），持有 `UpdateService` 实例 |
+| `GalleryController` | `features/gallery/application` | 相册状态与流程编排（含 `GalleryIndexHooks` 实现），经 `GalleryScope` 注入 |
+
+控制器配套领域模型随域归属对应 feature 的 domain 层（`login_result`、`move_models`、`delete_models`、`transfer_enqueue`、`share_import_models`、`directory_summary` 等）。
+
+装配收敛在 `AppBootstrap.initialize`（`lib/app/bootstrap/app_bootstrap.dart`）与 `AppServices` 构造函数：
+
+- `OssClient` 创建一次，注入全部需要直连 OSS 的控制器（含 GalleryController），`onCredentialExpired` 指向 `SessionController.handleCredentialExpired`
+- 跨控制器依赖采用构造注入具体类型引用（不引入接口抽象）：如 `TransferController`/`MoveController`/`RecycleBinController` 持 `SessionController` 读会话与权限、持 `WorkspaceController` 做树版本/目录统计/选择状态修正，`ShareImportController` 持 `TransferController` 与 `WorkspaceController`
+- `navigatorKey`（冲突对话框）与 `GalleryIndexHooks`（上传增量更新/删除清理/还原恢复）经 setter 注入（`AppServices.setNavigatorKey` / `setGalleryHooks`）
+- 纯路径工具（`rootPrefix` 常量、`normalizeDirPath`、`parentPathOf`）下沉为 `shared/path_utils.dart` 顶层函数，消除控制器间工具方法互调
 
 原则：
 
-- Repository / UseCase 通过 Provider 注入
-- 不在 Widget 中 `new` 出 infrastructure 实现
-- 平台实现按 `TargetPlatform` 或条件导入切换
+- 控制器与仓库由 `AppServices`/`AppBootstrap` 统一组装，不在 Widget 中 `new` 出 infrastructure 实现
+- 平台实现按条件分支工厂切换（如 `TransferKeepaliveService` 平台分支工厂），不引入服务定位器
 
 ### 5.3 状态边界
 
 | 状态 | 归属 | 说明 |
 | --- | --- | --- |
-| 登录会话 / STS / 能力 | auth | 全局只读，供其他模块消费 |
-| 当前目录、浏览方式、列表加载态 | workspace | 页面级 + 少量会话级偏好 |
-| 传输任务列表 | transfer | 全局可观察 |
-| 预览内容缓存 | preview | 页面级，退出可释放 |
-| 分享待上传列表 | share_import | 流程级，恢复登录后仍需保留 |
+| 登录会话 / 凭证 / 能力 | `SessionController` | 全局只读，供其他模块消费 |
+| 当前目录、浏览方式、选择、目录统计 | `WorkspaceController` | 页面级 + 少量会话级偏好 |
+| 别名表 | `AliasController` | 写后刷新浏览 |
+| 删除/回收站、移动进度 | `RecycleBinController` / `MoveController` | 经 `ValueNotifier` 细粒度通知 |
+| 传输任务列表与队列状态 | `TransferQueue` / `TransferController` | 全局可观察（`tasksListenable`） |
+| 分享待上传列表 | `ShareImportController` | 流程级，恢复登录后仍需保留 |
+| 主题 / 更新偏好 / 强制升级门禁 | `SettingsController` | 全局，`main.dart` 与 `app.dart` 外壳经 `AppServices` 访问 |
+| 相册索引、选中集、缓存角标 | `GalleryController` | 经 `GalleryScope` 注入 |
+| 预览内容缓存 | preview 页面 | 页面级，退出可释放 |
 
-不建议把所有状态塞进单一全局 Store。
+状态按域拆分为独立控制器，`AppServices` 只做聚合、转发与装配，不承载业务状态；不建议把所有状态塞进单一全局 Store。
 
 ## 6. 导航与信息架构
 
 ### 6.1 路由
 
-当前骨架路由可继续沿用：
+当前路由实现可继续沿用：
 
 | 路由 | 页面 | 说明 |
 | --- | --- | --- |
@@ -716,13 +781,15 @@ enum AppErrorType {
 
 | 能力 | Android | macOS | 落地位置 |
 | --- | --- | --- | --- |
-| 文件选择 | 系统选择器 | 文件对话框 | `platform/file_picker` |
-| 相册 | 支持 | 不强调 | `platform/file_picker` |
-| 拖拽上传 | 不要求 | 支持 | `platform/drag_drop` |
-| 系统分享 | 支持 SEND / SEND_MULTIPLE | 不涉及 | `platform/share_receiver` |
+| 文件选择 | 系统选择器 | 文件对话框 | `file_picker` 插件（presentation 调用） |
+| 相册 | 支持 | 不强调 | `file_picker` 插件（presentation 调用） |
+| 拖拽上传 | 不要求 | 支持 | workspace presentation（macOS 分支） |
+| 系统分享 | 支持 SEND / SEND_MULTIPLE | 不涉及 | `share_import/infrastructure`（`AndroidShareImportBridge`） |
 | 布局 | 单栏 + 底栏 + FAB | 双栏/三栏 | presentation 响应式/平台分支 |
 | 文件操作手势 | 点击/长按/更多菜单 | 右键/工具栏可补充 | workspace presentation |
-| 下载路径 | 应用目录或用户选择 | 更贴近访达保存习惯 | `platform/path_provider` |
+| 下载路径 | 应用目录或用户选择 | 更贴近访达保存习惯 | `core/utils/download_directory.dart` |
+
+平台差异不设独立 `platform/` 顶层目录，按归属收敛在 feature 各层与 `core/utils`、`shared`（见 3 节目录结构说明）。
 
 ### 9.3 UI 一致性要求
 
@@ -755,7 +822,7 @@ enum AppErrorType {
 
 只列架构相关建议，具体版本以实施时为准：
 
-- 状态管理：`flutter_riverpod`
+- 状态管理：不引入状态管理框架，使用 `ChangeNotifier` + `InheritedNotifier`（`AppServices` 聚合 + `AppScope` 注入，见 5.2 节）
 - 路由：先维持现有 `onGenerateRoute`；复杂度上升后再评估 `go_router`
 - 网络：`dio` 或等价 HTTP 客户端（FC 调用）
 - OSS：官方/社区成熟 OSS SDK，或基于签名的轻量封装
@@ -800,19 +867,20 @@ enum AppErrorType {
 
 ## 14. 与现有工程的映射
 
-当前客户端骨架已具备：
+当前客户端工程已按本文档落地：
 
-- `app/` 启动、主题、路由
-- `features/auth|workspace|transfer|preview|settings` 分层目录
-- domain 基础模型：`UserSession`、`FileItem`、`TransferTask`
-- application 用例雏形：`BootstrapSessionUseCase`、`LoadDirectoryUseCase`
+- `app/`：`AppBootstrap` 启动装配、主题、路由
+- `shared/state/`：`AppServices` 控制器聚合层与 `AppScope` 注入入口
+- `features/` 各模块按 `application / domain / infrastructure / presentation` 分层，状态控制器归属各 feature 的 application 层（职责表见 5.2 节）
+- domain 模型：`UserSession`、`LoginResult`、`FileItem`、`TransferTask`、`DirectorySummary`、`MoveModels`/`DeleteModels`、`ShareImportModels`、`PhotoEntry`/`PhotoManifest` 等
+- infrastructure：`OssClient`（listing/media/transfer part）、`SessionRepository` 及安全存储、`PhotoIndexRepository`/`PhotoScanner`、各平台桥接与保活服务
+- 测试按控制器直测组织（见 3.6 节）
 
-后续实施时：
+后续演进时：
 
-1. 先补齐 domain 模型字段（capabilities、STS、任务路径等）
-2. 再补 infrastructure 的 FC / OSS 实现
-3. 最后把 presentation 从占位页推进到可交互闭环
-4. 平台差异优先进入 `platform/`，避免散落在页面里
+1. 新增能力优先落入对应 feature 的对应分层，不新增顶层目录
+2. 新增文件遵守单文件 ≤ 800 行约束（拆分手法见 3.5 节）
+3. 跨域依赖沿用构造注入具体类型引用 + setter 注入钩子的装配约定
 
 ## 15. 明确不做的架构事项（一期）
 
@@ -845,4 +913,4 @@ Flutter 客户端采用“**按 feature 拆分 + 四层分层 + 平台适配边�
 - 权限云端兜底
 - 平台差异集中治理
 
-该架构与当前 `private-domain-drive-client` 骨架一致，可直接作为一期实现与代码评审依据。后续若模块增长，优先在现有 feature 内扩展，而不是重新定义分层体系。
+该架构与当前 `private-domain-drive-client` 实现一致，可直接作为一期实现与代码评审依据。后续若模块增长，优先在现有 feature 内扩展，而不是重新定义分层体系。

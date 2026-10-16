@@ -80,8 +80,8 @@
 ## 17. 集成验证与文档
 
 - [x] 17.1 client 仓库全量 `flutter analyze`（0 issue）与 `flutter test` 通过，并用 `--dart-define-from-file=../secrets/client/local.json` 启动 macOS 冒烟：登录、浏览、上传下载、移动、回收站、分享导入、冲突对话框、相册浏览、应用外壳与门禁放行（`DISABLE_STARTUP_UPDATE_CHECK` 注入下门禁应静默跳过）各走一遍
-- [ ] 17.2 更新 `docs/Flutter架构设计.md`：控制器职责表、目录结构（application 层控制器归属、`presentation/widgets/` 与 part 文件约定）、AppServices 装配与 AppScope 访问方式描述，验证文档与最终代码结构一致
-- [ ] 17.3 主仓库更新 client submodule 指针并提交文档变更，验证 `git submodule status` 指向新 commit
+- [x] 17.2 更新 `docs/Flutter架构设计.md`：控制器职责表、目录结构（application 层控制器归属、`presentation/widgets/` 与 part 文件约定）、AppServices 装配与 AppScope 访问方式描述，验证文档与最终代码结构一致
+- [x] 17.3 主仓库更新 client submodule 指针并提交文档变更，验证 `git submodule status` 指向新 commit
 
 ## Workflow follow-up
 
