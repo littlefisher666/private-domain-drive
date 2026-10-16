@@ -12,7 +12,7 @@
 - [x] 2.2 在"生成平台更新清单"之前新增"上传 OSS 镜像"步骤：将本次发布资产上传到 `releases/<platform>/<version>/`，`--acl public-read --bigfile-threshold=10 --jobs=4`，按平台写入成功标记到 `$GITHUB_ENV`，任一失败不中断流水线。验证：触发发布后上传日志无报错、OSS 控制台可见 `releases/android/<version>/` 下公开读对象
 - [x] 2.3 调整"生成平台更新清单"与 appcast 维护步骤的 base url 选择：镜像成功时资产 `url`/enclosure 用 `https://private-domain-drive.oss-cn-hangzhou.aliyuncs.com` 前缀，否则回退 `RELEASE_BASE_URL`；appcast item 的 `<link>` 保持 GitHub Release 页面。验证：发布产物 `update.json` 与 `appcast.xml` 新 item 中下载地址为 OSS 直链
 - [x] 2.4 验证回退路径：临时在 client 仓库停用（或留空）`PDD_RELEASE_OSS_*` secrets 触发一次发布，确认发布正常完成、`update.json` 与 appcast 下载地址回退为 GitHub、流水线无失败标记；验证后恢复 secrets
-- [ ] 2.5 安卓镜像规避 OSS 匿名下载拦截：镜像对象以 `.bin` 命名并显式写 `Content-Type: application/octet-stream` 上传（key 含 `.apk` 或 apk 类型在默认域名匿名请求返回 400 `ApkDownloadForbidden`），清单安卓 `url` 按 `.bin` 拼装（`name`/`digest` 保持原值）；上传后对全部镜像直链做匿名探测（range 请求 200/206 才计成功，否则按镜像失败回退）。验证：下一次发布匿名下载安卓 `.bin` 全量与 GitHub 资产 SHA-256 一致且探测日志通过；v1.0.10 存量清单修复（服务端复制对象 + 清单改指 `.bin` 直链，匿名 206、摘要一致）已于 2026-10-16 完成
+- [x] 2.5 安卓镜像规避 OSS 匿名下载拦截：镜像对象以 `.bin` 命名并显式写 `Content-Type: application/octet-stream` 上传（key 含 `.apk` 或 apk 类型在默认域名匿名请求返回 400 `ApkDownloadForbidden`），清单安卓 `url` 按 `.bin` 拼装（`name`/`digest` 保持原值）；上传后对全部镜像直链做匿名探测（range 请求 200/206 才计成功，否则按镜像失败回退）。验证：下一次发布匿名下载安卓 `.bin` 全量与 GitHub 资产 SHA-256 一致且探测日志通过；v1.0.10 存量清单修复（服务端复制对象 + 清单改指 `.bin` 直链，匿名 206、摘要一致）已于 2026-10-16 完成。实测（run 38841282644，android/v1.0.11）：上传后探测 206，清单直链匿名下载 200、SHA-256 与清单 `digest` 完全一致
 
 ## 3. 文档与仓库指针同步
 
@@ -21,7 +21,7 @@
 
 ## 4. 端到端验证
 
-- [ ] 4.1 触发一次 `both` 发布，验证：两个平台的 OSS 对象存在且无需凭证 curl 返回 200、`update.json` 与 appcast 下载地址为 OSS 直链、国内网络实测下载速度明显优于 GitHub 直连
+- [x] 4.1 触发一次 `both` 发布，验证：两个平台的 OSS 对象存在且无需凭证 curl 返回 200、`update.json` 与 appcast 下载地址为 OSS 直链、国内网络实测下载速度明显优于 GitHub 直连。（2026-10-16 完成：run 38841282644 发布 android/v1.0.11、macos/v1.0.15，安卓按 `.bin` 口径匿名下载 200、macOS dmg/zip 206，清单与 appcast 均为 OSS 直链；OSS 实测约 5–10 MB/s，GitHub 直连 30s 超时不可用）
 - [ ] 4.2 Android 端验证：用新发布版本触发应用内更新，确认 APK 从 OSS 直链下载、SHA-256 校验通过并可安装
 - [ ] 4.3 macOS 端验证：用新发布版本触发 Sparkle 更新，确认更新包从 OSS 直链下载、EdDSA 校验通过并完成替换
 
