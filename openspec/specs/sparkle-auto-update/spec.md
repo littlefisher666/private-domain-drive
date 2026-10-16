@@ -5,7 +5,15 @@
 ## Requirements
 
 ### Requirement: macOS Sparkle 更新检查
-macOS 客户端 SHALL 集成 Sparkle 自更新能力，从固定 appcast 地址拉取更新清单，并在版本号高于当前版本时向用户提示更新；客户端 SHALL 默认在启动后自动静默检查一次更新，SHALL 在设置页提供手动"检查更新"入口，并 SHALL 在设置页提供"启动时自动检查更新"开关（默认开启、本地持久化）。更新检查时机 SHALL 仅由应用显式发起：客户端 SHALL 通过 Info.plist 禁用 Sparkle 原生自动调度（`SUEnableAutomaticChecks` 为 `false`），Sparkle SHALL NOT 自行定时检查，也 SHALL NOT 弹出首次运行的"自动检查更新"系统授权弹窗。
+macOS 客户端 SHALL 集成 Sparkle 自更新能力；发起检查前客户端 SHALL 优先探测 OSS 发布目录固定路径 `releases/macos/appcast.xml`（探测超时 5 秒），探测通过时 SHALL 以 OSS 地址作为本次检查的 Sparkle feed，探测失败（网络错误、超时、状态码非 200）时 SHALL 回退以 GitHub appcast 地址作为 feed；并在版本号高于当前版本时向用户提示更新；客户端 SHALL 默认在启动后自动静默检查一次更新，SHALL 在设置页提供手动"检查更新"入口，并 SHALL 在设置页提供"启动时自动检查更新"开关（默认开启、本地持久化）。更新检查时机 SHALL 仅由应用显式发起：客户端 SHALL 通过 Info.plist 禁用 Sparkle 原生自动调度（`SUEnableAutomaticChecks` 为 `false`），Sparkle SHALL NOT 自行定时检查，也 SHALL NOT 弹出首次运行的"自动检查更新"系统授权弹窗。
+
+#### Scenario: OSS feed 优先
+- **WHEN** OSS appcast 探测通过
+- **THEN** 客户端 SHALL 以 OSS 地址作为本次检查的 Sparkle feed 发起更新检查
+
+#### Scenario: OSS feed 不可用时回退 GitHub
+- **WHEN** OSS appcast 探测超时、状态码非 200 或网络错误
+- **THEN** 客户端 SHALL 回退以 GitHub appcast 地址完成本次检查，SHALL NOT 仅因 OSS 探测失败直接判定检查失败
 
 #### Scenario: 发现新版本
 - **WHEN** appcast 中最新 item 的版本号高于当前版本且包含有效的 EdDSA 签名与下载地址

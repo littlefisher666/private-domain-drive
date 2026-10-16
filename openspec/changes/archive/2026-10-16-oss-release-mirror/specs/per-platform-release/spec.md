@@ -52,3 +52,17 @@
 #### Scenario: 镜像与归档一致性
 - **WHEN** 同一版本资产同时存在于 OSS 镜像与 GitHub Release
 - **THEN** 两侧文件 SHALL 为同一构建产物，清单中的 SHA-256 摘要 SHALL 对两侧下载地址均有效
+
+### Requirement: 安卓镜像对象匿名下载规避
+安卓 APK 镜像对象 SHALL 以不含 `.apk` 子串的对象名（`.bin`）与 `Content-Type: application/octet-stream` 上传（OSS 默认域名对键名含 `.apk` 或 apk 类型的对象拦截匿名下载，返回 400 `ApkDownloadForbidden`）；清单中安卓资产 `url` SHALL 指向该 `.bin` 对象，`name` 与 `digest` SHALL 保持与原始 APK 一致。
+
+#### Scenario: 安卓镜像规避 OSS 匿名下载拦截
+- **WHEN** 发布流水线镜像 Android 资产
+- **THEN** OSS 上安卓镜像对象 SHALL 以 `.bin` 命名且 `Content-Type` 为 `application/octet-stream`，匿名请求该直链 SHALL 可完整下载，下载字节的 SHA-256 SHALL 与清单 `digest`（原始 APK 摘要）一致，清单安卓 `name` SHALL 仍为 `.apk` 以保证客户端本地保存文件名与安装流程不变
+
+### Requirement: 镜像直链匿名自检
+发布流水线 SHALL 在每个平台资产上传后以匿名请求探测镜像直链（range 请求返回 200/206 视为通过）；探测未通过 SHALL 与上传失败同等处理（按回退规则使用 GitHub 下载地址），发布 SHALL NOT 失败。
+
+#### Scenario: 镜像直链匿名探测
+- **WHEN** 发布流水线完成某平台资产上传
+- **THEN** 流水线 SHALL 以无凭证请求探测镜像直链，探测未返回 200/206 时 SHALL 将该平台判定为镜像失败并按回退规则使用 GitHub 下载地址
