@@ -35,7 +35,7 @@
 
 ## 7. 抽取 AliasController
 
-- [ ] 7.1 新建 `lib/features/workspace/application/alias_controller.dart`：`openAlias/createAlias/deleteAlias/renameAlias/_validateAliasName`，持 `SessionController`/`WorkspaceController`/`AliasRepository`/`OssClient`，`openAlias` 经 `WorkspaceController.enterAliasTarget` 触发导航；`AppController` 门面委托，验证 `flutter test` 全量通过（重点：`workspace_alias_test.dart`）
+- [x] 7.1 新建 `lib/features/workspace/application/alias_controller.dart`：`openAlias/createAlias/deleteAlias/renameAlias/_validateAliasName`，持 `SessionController`/`WorkspaceController`/`AliasRepository`/`OssClient`，`openAlias` 经 `WorkspaceController.enterAliasTarget` 触发导航；`AppController` 门面委托，验证 `flutter test` 全量通过（重点：`workspace_alias_test.dart`）
 
 ## 8. 抽取 WorkspaceController 与 SettingsController
 
