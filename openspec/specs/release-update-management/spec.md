@@ -5,35 +5,48 @@
 ## Requirements
 
 ### Requirement: 检查静态更新清单
-Android 客户端 SHALL 优先从 OSS 发布目录固定路径 `releases/android/update.json` 获取静态更新清单；OSS 清单请求失败（网络错误、超时、状态码非 200、内容无法解析）时 SHALL 回退为通过 GitHub Releases 列表接口查询发布记录，在 tag 匹配 `android/` 前缀的发布中选取版本号最高的一个（不依赖接口返回顺序），读取该 Release 附带的 `private-domain-drive-update.json`，并只在清单产品版本高于当前版本且存在 Android 资产时提示更新；macOS 客户端 SHALL NOT 再通过静态更新清单检查更新，其更新检查改由 Sparkle 能力承担。
+
+Android 客户端 SHALL 优先从 OSS 发布目录固定路径 `releases/android/update.json` 获取静态更新清单；OSS 清单请求失败（网络错误、超时、状态码非 200、内容无法解析）时 SHALL 回退为通过 GitHub Releases 列表接口查询发布记录，在 tag 匹配 `android/` 前缀的发布中选取版本号最高的一个（不依赖接口返回顺序），读取该 Release 附带的 `private-domain-drive-update.json`，并只在清单产品版本高于当前版本且存在 Android 资产时提示更新；macOS 客户端 SHALL NOT 通过静态更新清单检查或交付更新，其更新检查由 Sparkle 能力承担；两端 SHALL 读取本平台更新清单的 `minSupportedVersion` 用于最低支持版本门禁判定（见 forced-upgrade-gate 能力），macOS 端的门禁读取沿用 OSS 固定路径优先、不可用时回退 GitHub 链路的发现方式。
 
 #### Scenario: OSS 清单优先命中
+
 - **WHEN** Android 客户端检查更新且 OSS 固定路径清单成功返回
 - **THEN** 客户端 SHALL 直接以该清单作为本次检查依据，SHALL NOT 查询 GitHub Releases 列表
 
 #### Scenario: OSS 清单不可用时回退
+
 - **WHEN** OSS 清单请求网络错误、超时、状态码非 200 或内容无法解析
 - **THEN** 客户端 SHALL 转入 GitHub Releases 列表回退链路完成本次检查；仅当回退链路同样失败时 SHALL 按检查失败处理
 
 #### Scenario: 发现当前平台的新版本
+
 - **WHEN** Android 客户端检查更新，且获取到的清单产品版本高于当前版本并包含 Android 资产
 - **THEN** 客户端 SHALL 展示远端版本与更新操作；清单未提供更新说明时 SHALL 展示“暂无更新说明”
 
 #### Scenario: 当前已是最新版本
+
 - **WHEN** 客户端获取到的当前平台清单版本不高于当前版本
 - **THEN** 客户端 SHALL 提示已是最新版本
 
 #### Scenario: 另一端单独发版
+
 - **WHEN** 当前平台清单版本不高于当前版本，而其他平台存在版本号更高的发布
 - **THEN** 客户端 SHALL 不提示更新
 
 #### Scenario: 当前平台缺少资产
+
 - **WHEN** 当前平台版本号最高的 Release 清单未包含当前平台要求的 `.apk` 或 `.dmg` 发布资产
 - **THEN** 客户端 SHALL 不将该清单版本视为可更新版本
 
 #### Scenario: 不存在平台匹配的 Release
+
 - **WHEN** Releases 列表中没有任何 tag 匹配当前平台前缀的发布记录
 - **THEN** 客户端 SHALL 按已是最新版本静默处理并提示暂未发现本平台的发布版本，且不得报错中断
+
+#### Scenario: macOS 读取清单仅用于门禁
+
+- **WHEN** macOS 客户端执行启动静默检查
+- **THEN** 客户端 SHALL 读取本平台更新清单的 `minSupportedVersion` 用于门禁判定，SHALL NOT 据此触发 Sparkle 链路之外的更新提示或更新交付
 
 ### Requirement: 更新检查交互反馈
 Android 客户端 SHALL 在更新检查（手动或自动）发起时立即展示进行中状态（加载指示与"正在检查最新版本…"副标题），检查进行中 SHALL 忽略重复触发；检查失败时 SHALL 在设置页展示"网络不稳定，无法访问 GitHub"并 SHALL 提供用系统浏览器打开 GitHub Releases 页面的手动下载入口；macOS 客户端的检查中与失败反馈由 Sparkle 原生交互与手动下载兜底承担，SHALL NOT 复用该 Dart 侧状态机。
@@ -97,3 +110,17 @@ Android 客户端 SHALL 在发起更新检查请求前通过平台通道读取 `
 #### Scenario: 发布包登录
 - **WHEN** 用户启动 Profile 或 Release 构建
 - **THEN** 登录页 SHALL 以空账号和空口令输入框启动
+
+### Requirement: 更新清单字段的向后兼容
+
+更新清单的字段变更 SHALL 保持向后兼容：新增字段 SHALL NOT 改变既有字段的含义与结构；新版客户端读取不包含新增字段的旧清单时 SHALL 按缺省语义处理且不得报错。
+
+#### Scenario: 旧客户端读取新清单
+
+- **WHEN** 未包含强制升级能力的旧版客户端读取带有 `minSupportedVersion` 字段的新清单
+- **THEN** 其更新检查行为 SHALL 与字段不存在时一致，SHALL NOT 报错或改变既有提示逻辑
+
+#### Scenario: 新客户端读取旧清单
+
+- **WHEN** 客户端读取不包含 `minSupportedVersion` 字段的清单
+- **THEN** 客户端 SHALL 按不限制处理，SHALL NOT 判定强制升级
