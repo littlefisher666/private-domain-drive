@@ -46,36 +46,36 @@
 
 - [x] 9.1 新建 `lib/shared/state/app_services.dart`：持有全部控制器、订阅并转发通知、统一 `bootstrap()`（偏好/传输恢复 → 会话恢复 → 工作区重置）；重写 `lib/app/bootstrap/app_bootstrap.dart` 装配全部依赖与钩子（含 `UpdateService` 注入 SettingsController），验证 `flutter analyze` 通过
 - [x] 9.2 `lib/shared/state/app_scope.dart` 改为 `InheritedNotifier<AppServices>`；迁移 12 个 UI 文件的全部调用点（workspace_page 32 处、recycle_bin_page、transfer_tasks_page、gallery_viewer_page、preview_page、settings_page、forced_upgrade_page 3 处、login/splash/change_password、share_target_dialog、home_shell、app.dart、main.dart、file_repository、gallery_controller 改为持新控制器）；删除 `app_controller.dart` 门面，验证 `flutter analyze` + `flutter test` 全量通过
-- [ ] 9.3 拆分剩余 `app_controller_test.dart`（1303 行，工作区浏览/选择/回收站/别名相关用例）为 `test/workspace_controller_test.dart`、`test/alias_controller_test.dart`、`test/settings_controller_test.dart` 并直测新控制器；`forced_upgrade_widget_test.dart` 改经 AppServices 装配（门禁断言不变），删除旧测试文件，验证全量测试通过且覆盖不减少
+- [x] 9.3 拆分剩余 `app_controller_test.dart`（1303 行，工作区浏览/选择/回收站/别名相关用例）为 `test/workspace_controller_test.dart`、`test/alias_controller_test.dart`、`test/settings_controller_test.dart` 并直测新控制器；`forced_upgrade_widget_test.dart` 改经 AppServices 装配（门禁断言不变），删除旧测试文件，验证全量测试通过且覆盖不减少
 
 ## 10. 拆分 workspace_page.dart
 
-- [ ] 10.1 新建 `lib/features/workspace/presentation/widgets/`，把 21 个子组件类逐个搬入独立文件（`_BatchSelectionBar`、`WorkspaceDesktopBody`、`_CupertinoSegmented`、`_SegButton`、`_ThumbnailSizeSegmented`、`WorkspaceMobileHeader`、`_EmptyState`、`WorkspaceListView`、`WorkspaceGridView`、`_MobileUniformGrid`、`_DesktopMarqueeSelection`、`_SelectionRectanglePainter`、`_DetailPanel`、`_HoverCheckbox`、`_InlineRenameField`、`_MoveProgressBanner`、`_DeleteProgressBanner` 等，跨文件使用的去下划线小范围公开），验证 `flutter analyze` + `flutter test` 全量通过
-- [ ] 10.2 `_WorkspacePageState` 用 `part` 文件按关注点切分：主文件保留生命周期/导航/打开选择（约 600 行），`workspace_page_actions.dart` 放操作处理器（新建/重命名/删除/别名/下载/移动/上传弹窗），`workspace_page_build.dart` 放 build 构建与摘要辅助，验证 `flutter analyze` + `flutter test` 全量通过且 `workspace_page.dart` 主文件 ≤ 800 行
+- [x] 10.1 新建 `lib/features/workspace/presentation/widgets/`，把 21 个子组件类逐个搬入独立文件（`_BatchSelectionBar`、`WorkspaceDesktopBody`、`_CupertinoSegmented`、`_SegButton`、`_ThumbnailSizeSegmented`、`WorkspaceMobileHeader`、`_EmptyState`、`WorkspaceListView`、`WorkspaceGridView`、`_MobileUniformGrid`、`_DesktopMarqueeSelection`、`_SelectionRectanglePainter`、`_DetailPanel`、`_HoverCheckbox`、`_InlineRenameField`、`_MoveProgressBanner`、`_DeleteProgressBanner` 等，跨文件使用的去下划线小范围公开），验证 `flutter analyze` + `flutter test` 全量通过
+- [x] 10.2 `_WorkspacePageState` 用 `part` 文件按关注点切分：主文件保留生命周期/导航/打开选择（约 600 行），`workspace_page_actions.dart` 放操作处理器（新建/重命名/删除/别名/下载/移动/上传弹窗），`workspace_page_build.dart` 放 build 构建与摘要辅助，验证 `flutter analyze` + `flutter test` 全量通过且 `workspace_page.dart` 主文件 ≤ 800 行
 
 ## 11. 拆分 gallery_viewer_page.dart
 
-- [ ] 11.1 把 15 个子组件类（`_MobileViewer`、`_MobileDetailSheet`、`_DesktopViewer`、`_OverlayAction`、`_DownloadOverlayAction`、`_InfoPanel`、`_ViewerImage`、`_VideoPlayerView`、`_MobileVideoControls`、`_DownloadButton` 等）搬入 `lib/features/gallery/presentation/widgets/` 独立文件，`FileSizeFormatterLite` 迁至共享工具；主文件保留 `GalleryViewerArguments`/`GalleryViewerPage`/`_GalleryViewerPageState`（≤ 300 行），验证 `flutter analyze` + `flutter test` 全量通过（重点：`preview_page_test.dart` 与视频播放相关用例）
+- [x] 11.1 把 15 个子组件类（`_MobileViewer`、`_MobileDetailSheet`、`_DesktopViewer`、`_OverlayAction`、`_DownloadOverlayAction`、`_InfoPanel`、`_ViewerImage`、`_VideoPlayerView`、`_MobileVideoControls`、`_DownloadButton` 等）搬入 `lib/features/gallery/presentation/widgets/` 独立文件，`FileSizeFormatterLite` 迁至共享工具；主文件保留 `GalleryViewerArguments`/`GalleryViewerPage`/`_GalleryViewerPageState`（≤ 300 行），验证 `flutter analyze` + `flutter test` 全量通过（重点：`preview_page_test.dart` 与视频播放相关用例）
 
 ## 12. 拆分 transfer_tasks_page.dart
 
-- [ ] 12.1 把 `_TransferHeaderActions`、`_TransferSelectionActions`、`_TransferTypeFilter` 搬入 `lib/features/transfer/presentation/widgets/`；`_TransferTasksPageState` 的 build 辅助（`_buildBody`/`_buildMobileTaskCard`/详情与格式化）用 `part` 文件 `transfer_tasks_page_build.dart` 切出，主文件 ≤ 600 行，验证 `flutter analyze` + `flutter test` 全量通过（重点：`transfer_tasks_page_test.dart`）
+- [x] 12.1 把 `_TransferHeaderActions`、`_TransferSelectionActions`、`_TransferTypeFilter` 搬入 `lib/features/transfer/presentation/widgets/`；`_TransferTasksPageState` 的 build 辅助（`_buildBody`/`_buildMobileTaskCard`/详情与格式化）用 `part` 文件 `transfer_tasks_page_build.dart` 切出，主文件 ≤ 600 行，验证 `flutter analyze` + `flutter test` 全量通过（重点：`transfer_tasks_page_test.dart`）
 
 ## 13. 拆分 gallery_page.dart
 
-- [ ] 13.1 把 13 个子组件类（`_DesktopShortcuts`、`_GroupHeader`、`_PhotoCell`、`_ThumbnailView`、`_CloudBadge`、`_MobileAppBar`、`_MobileBatchBar`、`_BatchAction`、`_DesktopSelectionBar`、`_DesktopStatusLine`、`_ScanProgressView`、`_ErrorView` 等）搬入 `lib/features/gallery/presentation/widgets/`，主文件保留 `GalleryPage` 与 `_GalleryPageState`（≤ 400 行），验证 `flutter analyze` + `flutter test` 全量通过
+- [x] 13.1 把 13 个子组件类（`_DesktopShortcuts`、`_GroupHeader`、`_PhotoCell`、`_ThumbnailView`、`_CloudBadge`、`_MobileAppBar`、`_MobileBatchBar`、`_BatchAction`、`_DesktopSelectionBar`、`_DesktopStatusLine`、`_ScanProgressView`、`_ErrorView` 等）搬入 `lib/features/gallery/presentation/widgets/`，主文件保留 `GalleryPage` 与 `_GalleryPageState`（≤ 400 行），验证 `flutter analyze` + `flutter test` 全量通过
 
 ## 14. 切分 oss_client.dart
 
-- [ ] 14.1 用 `part` 文件按职责切分（公开 API 不变、零调用点改动）：主文件保留配置/凭证/会话核心，`oss_client_listing.dart` 放目录列举与统计（list/directorySummary/listEntryNames/listAllObjectKeys/forEachObjectKeyPage/calculateDirectorySize/listPrefixes/objectExists/listAllObjects），`oss_client_media.dart` 放媒体处理（缩略图/预览/视频截帧/EXIF 与解析器），`oss_client_transfer.dart` 放传输（上传/下载/流式/预签名/copy/deleteMany/cancelTransfer）；`DirectorySummary` 数据类迁至 `lib/features/workspace/domain/directory_summary.dart`，验证 `flutter analyze` + `flutter test` 全量通过且每个 part ≤ 800 行
+- [x] 14.1 用 `part` 文件按职责切分（公开 API 不变、零调用点改动）：主文件保留配置/凭证/会话核心，`oss_client_listing.dart` 放目录列举与统计（list/directorySummary/listEntryNames/listAllObjectKeys/forEachObjectKeyPage/calculateDirectorySize/listPrefixes/objectExists/listAllObjects），`oss_client_media.dart` 放媒体处理（缩略图/预览/视频截帧/EXIF 与解析器），`oss_client_transfer.dart` 放传输（上传/下载/流式/预签名/copy/deleteMany/cancelTransfer）；`DirectorySummary` 数据类迁至 `lib/features/workspace/domain/directory_summary.dart`，验证 `flutter analyze` + `flutter test` 全量通过且每个 part ≤ 800 行
 
 ## 15. photo_index_repository.dart 抽 PhotoScanner
 
-- [ ] 15.1 新建 `lib/features/gallery/infrastructure/photo_scanner.dart`：`PhotoScanner` 承载 `fullScan`/`_scanEntry`/`_scanEntryOnce`/`backfillMissingThumbnails`/`_backfillEntryWithRetry`/`_backfillEntry`/`_resizeOriginalThumbnail`（构造注入 `OssClient` 与缩略图上传回调）；`PhotoIndexRepository` 保留 manifest 读写、写入队列、`addUploadedMedia`、`removeDeletedMedia`、`restoreMedia`、`isMediaKey`（≤ 500 行），验证 `flutter analyze` + `flutter test` 全量通过（重点：gallery 扫描与回填相关测试）
+- [x] 15.1 新建 `lib/features/gallery/infrastructure/photo_scanner.dart`：`PhotoScanner` 承载 `fullScan`/`_scanEntry`/`_scanEntryOnce`/`backfillMissingThumbnails`/`_backfillEntryWithRetry`/`_backfillEntry`/`_resizeOriginalThumbnail`（构造注入 `OssClient` 与缩略图上传回调）；`PhotoIndexRepository` 保留 manifest 读写、写入队列、`addUploadedMedia`、`removeDeletedMedia`、`restoreMedia`、`isMediaKey`（≤ 500 行），验证 `flutter analyze` + `flutter test` 全量通过（重点：gallery 扫描与回填相关测试）
 
 ## 16. 切分 gallery_controller.dart
 
-- [ ] 16.1 `GalleryIndexHooks` 实现方法（`prepareVideoThumbnail`/`prepareImageThumbnail`/`onMediaUploaded`/`onObjectsDeleted`/`onObjectsRestored`）用 `part` 文件 `gallery_controller_hooks.dart` 切出，主文件 ≤ 750 行，验证 `flutter analyze` + `flutter test` 全量通过（重点：gallery 增量更新相关测试）
+- [x] 16.1 `GalleryIndexHooks` 实现方法（`prepareVideoThumbnail`/`prepareImageThumbnail`/`onMediaUploaded`/`onObjectsDeleted`/`onObjectsRestored`）用 `part` 文件 `gallery_controller_hooks.dart` 切出，主文件 ≤ 750 行，验证 `flutter analyze` + `flutter test` 全量通过（重点：gallery 增量更新相关测试）
 
 ## 17. 集成验证与文档
 
