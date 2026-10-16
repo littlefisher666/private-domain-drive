@@ -25,7 +25,7 @@
 
 ## 5. 抽取 MoveController
 
-- [ ] 5.1 新建 `lib/features/workspace/domain/move_models.dart`（迁出 `MoveProgress/MoveSummary/MoveConflictResolution`）与 `lib/features/workspace/application/move_controller.dart`：`moveItems` 全流程、冲突对话框、`listPendingMoves/resumePendingMove/undoPendingMove` 与全部私有执行器，持 `SessionController`/`WorkspaceController`/`OssClient`/`navigatorKey`/`GalleryIndexHooks`；`AppController` 门面委托（`moveStateListenable/isMoving/moveItems/...`），验证 `flutter test` 全量通过（重点：`workspace_file_move_test.dart`）
+- [x] 5.1 新建 `lib/features/workspace/domain/move_models.dart`（迁出 `MoveProgress/MoveSummary/MoveConflictResolution`）与 `lib/features/workspace/application/move_controller.dart`：`moveItems` 全流程、冲突对话框、`listPendingMoves/resumePendingMove/undoPendingMove` 与全部私有执行器，持 `SessionController`/`WorkspaceController`/`OssClient`/`navigatorKey`/`GalleryIndexHooks`；`AppController` 门面委托（`moveStateListenable/isMoving/moveItems/...`），验证 `flutter test` 全量通过（重点：`workspace_file_move_test.dart`）
 - [ ] 5.2 新建 `test/move_controller_test.dart`，把 `app_controller_test.dart` 及 `workspace_file_move_test.dart` 中直连 AppController 的移动用例迁为直测 `MoveController`（保持断言与场景不变），验证全量通过
 
 ## 6. 抽取 RecycleBinController
