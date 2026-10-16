@@ -21,7 +21,8 @@
 
 ## 5. 端到端验证
 
-- [ ] 5.1 触发一次发布并验证：发布日志显示清单/appcast 上传与匿名探测通过；`curl` 匿名访问 `releases/android/update.json`、`releases/macos/update.json`、`releases/macos/appcast.xml` 均返回 200 且内容为本次发布版本
+- [x] 5.1 触发一次发布并验证：发布日志显示清单/appcast 上传与匿名探测通过；`curl` 匿名访问 `releases/android/update.json`、`releases/macos/update.json`、`releases/macos/appcast.xml` 均返回 200 且内容为本次发布版本
+  - 验证结果（run 38844534375，发布 android/v1.0.12、macos/v1.0.16）：流水线「上传 OSS 更新清单」日志显示两平台探测 200 并上传，「维护 appcast 清单」显示 appcast 探测 200；匿名 curl 三路径均 200 且版本为本次发布（安卓清单 url 指向 `.bin`、macOS appcast 最新 item 为 1.0.16、其 Sparkle zip enclosure 指向 OSS 且匿名 range 请求 206）
 - [ ] 5.2 Android 验证：用包含本变更的版本检查更新，确认日志显示 OSS 清单命中且更新链路正常；删除 OSS 指针后再次检查，确认回退 GitHub 链路正常（验证后恢复指针或等下一次发布覆盖）
 - [ ] 5.3 macOS 验证：确认 feed 探测日志显示 OSS 优先；模拟 OSS appcast 不可用（删除对象）时回退 GitHub feed 正常，随后恢复
 
