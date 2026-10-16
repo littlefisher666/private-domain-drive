@@ -9,8 +9,8 @@
 
 ## 2. 抽取 SessionController
 
-- [ ] 2.1 新建 `lib/features/auth/domain/login_result.dart`（迁出 `LoginResult`）与 `lib/features/auth/application/session_controller.dart`：会话状态、`login/logout/changePassword/bootstrap/ensureSessionReady/handleCredentialExpired/readSavedCredentials`、`beforeSessionCleared`/`onSessionChanged` 装配钩子；`AppController` 改为门面委托并接线 `_ossClient.onCredentialExpired`，验证 `flutter analyze` + `flutter test` 全量通过
-- [ ] 2.2 新建 `test/session_controller_test.dart`，把 `app_controller_test.dart` 中登录失败、记住凭据、改密三个测试迁入并改为直测 `SessionController`，验证两文件测试均通过且原断言不变
+- [x] 2.1 新建 `lib/features/auth/domain/login_result.dart`（迁出 `LoginResult`）与 `lib/features/auth/application/session_controller.dart`：会话状态、`login/logout/changePassword/bootstrap/ensureSessionReady/handleCredentialExpired/readSavedCredentials`、`beforeSessionCleared`/`onSessionChanged` 装配钩子；`AppController` 改为门面委托并接线 `_ossClient.onCredentialExpired`，验证 `flutter analyze` + `flutter test` 全量通过
+- [x] 2.2 新建 `test/session_controller_test.dart`，把 `app_controller_test.dart` 中登录失败、记住凭据、改密三个测试迁入并改为直测 `SessionController`，验证两文件测试均通过且原断言不变
 
 ## 3. 抽取 TransferController + TransferQueue
 
