@@ -30,8 +30,8 @@
 
 ## 6. 抽取 RecycleBinController
 
-- [ ] 6.1 新建 `lib/features/workspace/domain/delete_models.dart`（迁出 `BatchDeletePreview/BatchDeleteSummary/DeleteProgress`）与 `lib/features/workspace/application/recycle_bin_controller.dart`：`deleteItem/prepareBatchDelete/deleteBatch/_moveToRecycleBin/listRecycleBin/restoreRecycleBinEntry/purgeRecycleBinEntry/retryBatchDelete` 及回收站导航状态（`recycleBinPath/setRecycleBinPath/recycleBinUpPath`），持 `SessionController`/`WorkspaceController`/`OssClient`/`GalleryIndexHooks`；`AppController` 门面委托，验证 `flutter test` 全量通过（重点：`recycle_bin_per_item_test.dart`）
-- [ ] 6.2 新建 `test/recycle_bin_controller_test.dart`，迁入删除与回收站域测试并直测新控制器，验证原断言不变
+- [x] 6.1 新建 `lib/features/workspace/domain/delete_models.dart`（迁出 `BatchDeletePreview/BatchDeleteSummary/DeleteProgress`）与 `lib/features/workspace/application/recycle_bin_controller.dart`：`deleteItem/prepareBatchDelete/deleteBatch/_moveToRecycleBin/listRecycleBin/restoreRecycleBinEntry/purgeRecycleBinEntry/retryBatchDelete` 及回收站导航状态（`recycleBinPath/setRecycleBinPath/recycleBinUpPath`），持 `SessionController`/`WorkspaceController`/`OssClient`/`GalleryIndexHooks`；`AppController` 门面委托，验证 `flutter test` 全量通过（重点：`recycle_bin_per_item_test.dart`）
+- [x] 6.2 新建 `test/recycle_bin_controller_test.dart`，迁入删除与回收站域测试并直测新控制器，验证原断言不变
 
 ## 7. 抽取 AliasController
 
