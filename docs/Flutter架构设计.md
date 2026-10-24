@@ -145,6 +145,11 @@ lib/
       domain/                 # ShareImportModels
       infrastructure/         # AndroidShareImportBridge
       presentation/           # ShareTargetDialog
+    file_share/
+      application/            # FileShareController（缓存优先准备、进度、取消、系统分享）
+      domain/                 # ShareProgress、FileShareOutcome、FileShareCanceledException
+      infrastructure/         # ShareCacheStore（pdd_share_cache、7 天保留、2 GB LRU）
+      presentation/           # SharePrepareDialog
     settings/
       application/            # SettingsController、UpdateService
       infrastructure/         # GithubReleaseClient、ApkDownloader、AndroidUpdateInstaller、MacosSparkleUpdater、SystemProxy
@@ -211,7 +216,7 @@ OSS 平台差异收敛在本地 Flutter 插件 `packages/private_domain_oss/`（
 
 ### 3.6 测试文件组织
 
-测试文件平铺在 `test/` 下，按控制器直测：`session_controller_test.dart`、`workspace_controller_test.dart`、`move_controller_test.dart`、`recycle_bin_controller_test.dart`、`transfer_controller_test.dart`、`share_import_controller_test.dart`、`settings_controller_test.dart` 等，直接构造被测控制器与其依赖，不经 `AppServices` 聚合层；需要验证装配链路的用例（如强制升级门禁 widget 测试）经真实 `AppServices` 装配执行。
+测试文件平铺在 `test/` 下，按控制器直测：`session_controller_test.dart`、`workspace_controller_test.dart`、`move_controller_test.dart`、`recycle_bin_controller_test.dart`、`transfer_controller_test.dart`、`share_import_controller_test.dart`、`file_share_controller_test.dart`、`share_cache_store_test.dart`、`settings_controller_test.dart` 等，直接构造被测控制器与其依赖，不经 `AppServices` 聚合层；需要验证装配链路的用例（如强制升级门禁 widget 测试）经真实 `AppServices` 装配执行。
 
 ## 4. 功能模块设计
 
@@ -224,6 +229,7 @@ OSS 平台差异收敛在本地 Flutter 插件 `packages/private_domain_oss/`（
 | `transfer` | US-04 / US-05 / US-06 / US-12 / 功能 2.3、2.4、2.7 | 上传下载任务、进度、重试、取消 | P0/P1 |
 | `preview` | US-07 / 功能 2.5 | 图片、PDF、文本预览 | P0 |
 | `share_import` | US-11 / 功能 2.8 | Android 系统分享接收与目录选择上传 | P0 |
+| `file_share` | 文件分享（单个/批量） | Android 文件分享准备、批次进度与取消、系统分享面板调起、分享缓存治理 | P1 |
 | `settings` | US-14 / US-15 | 账号信息、能力展示、关于/退出登录 | P1 |
 | `gallery` | 相册功能 | 照片时间线、照片索引、原图缓存、大图查看器 | P1 |
 
@@ -292,6 +298,7 @@ class StsCredentials {
 - 新建文件夹、重命名、移动、删除
 - 列表 / 缩略图切换
 - 根据 `Capabilities` 控制操作入口
+- 批量操作条：批量下载、移动、删除；Android 选中项全部为普通文件时并列展示系统分享入口（支持单个/多个文件，分享逻辑归属 `file_share`）；单个文件的更多菜单同样提供分享入口
 
 #### 关键模型建议
 
@@ -530,7 +537,30 @@ class TransferTask {
 
 - 纯客户端 + OSS 约定实现，服务端 FC 不参与缩略图生成与照片索引（零服务端改动）
 - 内部对象统一收敛在 `.gallery/` 点前缀目录下（避免与用户自建目录撞名）；文件浏览统一隐藏所有点前缀条目（含回收站 `.trash/`、别名表 `.aliases/`、`.DS_Store` 等），文件夹统计同样不计入，目录级删除/回收操作仍处理全部对象（`OssClient.list` 过滤）
-- macOS 端不提供分享能力，Android 保留系统分享
+- 出站系统分享仅 Android 提供：相册入口支持长按多选后系统分享，文件工作区与文件更多菜单支持单个/多个文件系统分享；macOS 依赖访达与剪贴板，不提供应用内分享入口
+
+### 4.9 file_share 模块（Android 文件分享）
+
+#### 职责
+
+- 校验入口条件：仅 Android、具备下载能力、选中项全部为非别名普通文件；单个文件更多菜单与批量操作条共用该条件，文件夹、别名、混合选择与回收站均不展示入口
+- 按需准备本地副本：优先复用专用分享缓存，未命中时逐个下载到分享缓存并流式上报批次进度
+- 准备期间展示可取消进度弹窗（当前文件、批次序号、累计字节）；取消、失败或会话失效时中止当前下载、清理 `.part` 临时文件，且不调起系统分享面板；已完成的副本保留在缓存中可复用
+- 通过 `SharePlus.instance.share(ShareParams(files: [...]))` 调起系统分享面板，支持一次分享多个文件；分享内容为文件本身而非公开链接；`dismissed` 视为取消、异常统一提示失败
+- 分享缓存治理：目录 `getTemporaryDirectory()/pdd_share_cache/<sha256(objectPath|versionToken)>/<原始文件名>`；默认 7 天保留期与 2 GB 容量上限，App 启动与每次分享准备前按最近访问时间清理
+
+#### 关键模型
+
+- `ShareCacheStore`：缓存路径、命中/版本校验、`.part` 提交与清理、按时间与容量淘汰
+- `FileShareController`：入口条件、批量准备与进度（`ShareProgress`）、取消、分享结果映射（`FileShareOutcome`）
+- `SharePrepareDialog`：批次序号、当前文件名、累计已传输/总字节、可取消进度条
+
+#### 约束
+
+- 分享准备 MUST NOT 创建传输中心下载任务，MUST NOT 写入系统相册
+- 分享缓存独立于下载目录、预览缓存与相册缓存；清理仅删除本地文件，不影响 OSS 对象
+- 分享面板 MIME 由扩展名推断，未知类型使用通用类型仍允许分享
+- 服务端零改动，不生成公开分享链接
 
 ## 5. 应用层与状态管理
 
@@ -563,7 +593,7 @@ sequenceDiagram
 
 状态管理不引入第三方框架，使用 `ChangeNotifier` + `InheritedNotifier`：
 
-- `AppServices`（`lib/shared/state/app_services.dart`）：应用控制器聚合层（`ChangeNotifier`），持有全部控制器引用，订阅各子控制器并转发 `notifyListeners`（`TransferQueue` 非 `ChangeNotifier`，经 `ValueNotifier` 对外暴露状态、不参与监听链）；统一生命周期入口 `bootstrap()`（偏好/传输恢复 → 会话恢复 → 工作区重置）与跨域会话钩子编排（`beforeSessionCleared`：取消运行中传输、清空冲突决策；`onSessionChanged`：工作区与分享导入状态复位）
+- `AppServices`（`lib/shared/state/app_services.dart`）：应用控制器聚合层（`ChangeNotifier`），持有全部控制器引用，订阅各子控制器并转发 `notifyListeners`（`TransferQueue` 非 `ChangeNotifier`，经 `ValueNotifier` 对外暴露状态、不参与监听链）；统一生命周期入口 `bootstrap()`（分享缓存清理 → 偏好/传输恢复 → 会话恢复 → 工作区重置）与跨域会话钩子编排（`beforeSessionCleared`：取消运行中传输、清空冲突决策；`onSessionChanged`：工作区与分享导入状态复位）
 - `AppScope`（`lib/shared/state/app_scope.dart`）：`InheritedNotifier<AppServices>`，UI 统一经 `AppScope.of(context).xxxController.xxx` 访问；细粒度刷新仍走各控制器内 `ValueNotifier`（`tasksListenable`、`selectedItemListenable`、`moveStateListenable` 等），聚合转发不带来可感知重建开销
 
 各域控制器归属对应 feature 的 application 层：
@@ -578,6 +608,7 @@ sequenceDiagram
 | `TransferQueue` | `features/transfer/application` | 非 `ChangeNotifier` 纯 Dart 队列类：任务表、并发调度、keepalive 同步、传输历史与未完成上传持久化 |
 | `TransferController` | `features/transfer/application` | 上传/下载入队、同名冲突对话框、重试/继续/放弃/取消/暂停等任务操作 |
 | `ShareImportController` | `features/share_import/application` | Android 分享批次渐进接收与确认上传 |
+| `FileShareController` | `features/file_share/application` | Android 文件分享：入口条件、缓存优先的批量本地副本准备、可取消进度、系统分享面板调起与分享缓存清理 |
 | `SettingsController` | `features/settings/application` | 主题与自动检查更新偏好、强制升级门禁（`forcedUpgradeActive`/`checkForcedUpgradeGate`），持有 `UpdateService` 实例 |
 | `GalleryController` | `features/gallery/application` | 相册状态与流程编排（含 `GalleryIndexHooks` 实现），经 `GalleryScope` 注入 |
 
@@ -605,6 +636,7 @@ sequenceDiagram
 | 删除/回收站、移动进度 | `RecycleBinController` / `MoveController` | 经 `ValueNotifier` 细粒度通知 |
 | 传输任务列表与队列状态 | `TransferQueue` / `TransferController` | 全局可观察（`tasksListenable`） |
 | 分享待上传列表 | `ShareImportController` | 流程级，恢复登录后仍需保留 |
+| 分享准备进度与分享缓存 | `FileShareController` / `ShareCacheStore` | 经 `ValueNotifier` 通知弹窗；缓存为页面级临时文件，不跨会话保留业务状态 |
 | 主题 / 更新偏好 / 强制升级门禁 | `SettingsController` | 全局，`main.dart` 与 `app.dart` 外壳经 `AppServices` 访问 |
 | 相册索引、选中集、缓存角标 | `GalleryController` | 经 `GalleryScope` 注入 |
 | 预览内容缓存 | preview 页面 | 页面级，退出可释放 |
@@ -764,6 +796,15 @@ enum AppErrorType {
 3. 成功则重放原操作（可重试的读/写）
 4. 失败则保留现场（尤其是分享待上传列表），引导重新登录
 
+### 8.6 Android 文件分享
+
+1. 用户在文件工作区选中一个或多个普通文件，批量操作条展示「分享」；单个文件的更多菜单同样提供入口
+2. 校验平台、`capabilities.download` 与“全部为非别名文件”条件；点击后置防重入标记
+3. 查询分享缓存：全部命中则直接复用；否则先清理缓存，再逐个下载未命中文件并展示可取消的批次进度
+4. 取消或失败时删除当前 `.part` 临时文件，保留选择状态，不打开分享面板；已完成的副本保留可复用
+5. 准备完成后调用系统分享面板发送全部文件；面板取消视为取消，异常提示分享失败
+6. 分享全程不创建传输任务、不写入相册
+
 ## 9. 平台适配策略
 
 ### 9.1 共用层
@@ -784,7 +825,8 @@ enum AppErrorType {
 | 文件选择 | 系统选择器 | 文件对话框 | `file_picker` 插件（presentation 调用） |
 | 相册 | 支持 | 不强调 | `file_picker` 插件（presentation 调用） |
 | 拖拽上传 | 不要求 | 支持 | workspace presentation（macOS 分支） |
-| 系统分享 | 支持 SEND / SEND_MULTIPLE | 不涉及 | `share_import/infrastructure`（`AndroidShareImportBridge`） |
+| 系统分享导入 | 支持 SEND / SEND_MULTIPLE | 不涉及 | `share_import/infrastructure`（`AndroidShareImportBridge`） |
+| 系统分享导出 | 文件工作区与文件更多菜单支持单个/多个文件系统分享（`share_plus`） | 不涉及 | `file_share/application` + `file_share/infrastructure` |
 | 布局 | 单栏 + 底栏 + FAB | 双栏/三栏 | presentation 响应式/平台分支 |
 | 文件操作手势 | 点击/长按/更多菜单 | 右键/工具栏可补充 | workspace presentation |
 | 下载路径 | 应用目录或用户选择 | 更贴近访达保存习惯 | `core/utils/download_directory.dart` |
