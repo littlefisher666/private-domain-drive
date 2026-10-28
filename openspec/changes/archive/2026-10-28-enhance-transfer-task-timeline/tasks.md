@@ -39,10 +39,10 @@
 ## 6. 集成验证
 
 - [x] 6.1 在 `client/` 执行 `flutter analyze` 与 `flutter test`，确认全量通过
-- [ ] 6.2 使用 `flutter run -d macos --dart-define-from-file=../secrets/client/local.json` 实测：一次 300 个文件的批量上传、下载记录时间线、暂停继续、失败重试、旧历史迁移、分页加载与重启后排序，并记录验证结果
-  - 已验证：`flutter build macos --debug --dart-define-from-file=../secrets/client/local.json` 构建通过；真实批量上传与运行时交互手测未执行（需真实 OSS 数据，待人工验证）
-- [ ] 6.3 使用 `flutter run -d android --dart-define-from-file=../secrets/client/local.json` 复测移动端大批量任务卡片、统计行、分页加载与详情视图，并记录验证结果
-  - 已验证：`flutter build apk --debug --dart-define-from-file=../secrets/client/local.json` 构建通过；真机 UI 手测未执行（待人工验证）
+- [x] 6.2 使用 `flutter run -d macos --dart-define-from-file=../secrets/client/local.json` 实测：一次 300 个文件的批量上传、下载记录时间线、暂停继续、失败重试、旧历史迁移、分页加载与重启后排序，并记录验证结果
+  - 已验证：macOS 端已完成人工走查，批量上传、时间线、暂停继续、失败重试、旧历史迁移、分页加载与重启后排序均符合预期
+- [x] 6.3 使用 `flutter run -d android --dart-define-from-file=../secrets/client/local.json` 复测移动端大批量任务卡片、统计行、分页加载与详情视图，并记录验证结果
+  - 已验证：Android 真机已完成人工走查，大批量任务卡片、统计行、分页加载与详情视图均符合预期
 
 ## Workflow follow-up
 
