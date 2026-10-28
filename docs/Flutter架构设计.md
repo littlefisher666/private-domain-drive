@@ -128,9 +128,9 @@ lib/
       presentation/           # HomeShell、WorkspacePage（actions/build 两个 part）、RecycleBinPage、目录/别名对话框、widgets/
     transfer/
       application/            # TransferController、TransferQueue（非 ChangeNotifier 纯 Dart 队列类）
-      domain/                 # TransferTask、TransferEnqueue
-      infrastructure/         # UploadStaging
-      presentation/           # TransferTasksPage（build part）、widgets/
+      domain/                 # TransferTask、TransferTypeCounts、TransferEnqueue
+      infrastructure/         # TransferHistoryStore（SQLite 历史）、UploadStaging
+      presentation/           # TransferTasksPage（build part）、transfer_format.dart（字节/速度/时长/时间格式化）、widgets/
     preview/
       domain/                 # PreviewType
       infrastructure/         # TextPreviewLoader
@@ -426,13 +426,24 @@ class TransferTask {
 
 #### 上传任务持久化与恢复
 
-- 持久化介质沿用 SharedPreferences，新增 key `upload_pending:v1`，存「仅上传、非终态（排队 / 进行中 / 失败 / 已中断）」任务的 `TransferTask.toJson()` 列表；终态历史沿用既有 `transfer_history:v1`
+- 持久化介质沿用 SharedPreferences，新增 key `upload_pending:v1`，存「仅上传、非终态（排队 / 进行中 / 失败 / 已中断）」任务的 `TransferTask.toJson()` 列表；终态历史改由 SQLite `TransferHistoryStore` 承载（见下节）
 - 写入时机：仅任务状态迁移时整表重写（入队、running、failed、success、canceled、interrupted 恢复），上传进度回调不触发写入（状态签名比对去重）
 - 源文件 staging：位于应用缓存目录（系统分享拷贝、部分选择器结果）的上传源文件在入队前由 `UploadStaging` 迁移到 `getApplicationSupportDirectory()/upload-staging/<taskId>-<fileName>`（move 语义，不产生双份占用）；持久路径（如 macOS 本地磁盘选择的文件）不迁移
 - staging 清理时机：任务成功、被放弃、任务从列表移除时，按「sourcePath 位于 staging 目录内」判定删除
 - 冷启动恢复：bootstrap 阶段读取 `upload_pending:v1`，源文件存在 → 转为「已中断」（interrupted）状态展示，不自动续传；源文件缺失 → 标记失败（原因「源文件已丢失」）并从持久化记录清理
 - 恢复交互：传输中心对已中断任务提供「继续上传」（复用既有重试路径重新入队，进度归零、从头重传）与「放弃」（转已取消并清理 staging 文件），并提供「全部继续 / 全部放弃」批量入口；支持按单个任务处理，不强制整批
-- 排序：传输中心任务列表按「进行中 > 等待中 > 已中断 > 已结束」优先级排列
+- 排序：状态优先级为「进行中 > 等待中 > 已中断 > 已结束」；同状态内未结束任务按 `queuedAt` 倒序、已结束任务按 `finishedAt` 倒序，时间缺失或相同时以 `id` 倒序兜底，重启恢复后顺序稳定
+
+#### 传输时间线与历史
+
+- 任务模型新增 `queuedAt`、`startedAt`、`lastStartedAt`、`finishedAt`、`activeDurationMs`、`totalTransferredBytes`、`attemptCount`；时间戳以 UTC epoch 毫秒序列化、展示时转本地时区，缺失字段展示占位符，旧记录 `queuedAt` 可由 `id` 内嵌的微秒时间戳兜底
+- 计时口径：`TransferQueue._runTransfer` 每次运行创建 `Stopwatch`，在 `finally` 统一累加时长与本次实际传输字节；成功、失败、取消、暂停继续共用该收尾路径。暂停继续不增加尝试次数，用户重试 +1 并清空 `finishedAt`
+- 平均速度为派生值 `totalTransferredBytes / (activeDurationMs / 1000)`，时长为零或累计字节未知时返回空，不落库
+- `TransferHistoryStore`（`features/transfer/infrastructure`）使用 `sqflite` 打开 `transfer_history.db`，表 `transfer_history` 以任务 `id` 为主键存终态任务（含失败），建立 `finished_at DESC` 与 `(type, finished_at DESC)` 索引
+- 写入：终态变化先进入待写集合，约 300ms 合并为单事务批量 upsert；清除已结束任务与重试移出按 `id` 立即删除；通过对比任务表前后实例（`identical`）跳过进度刷新与分页加载触发的重复写入
+- 读取：启动加载第一页 300 条，滚动到底部按 `(finished_at, id)` 游标加载下一页并按 `id` 去重；类型计数取数据库 `COUNT(*) GROUP BY type` 加内存中未结束任务，不依赖已加载页
+- 迁移与保留：首次升级读取旧 `transfer_history:v1` 一次性导入并写入数据库迁移标记，旧键保留为回滚快照；启动时与写批次后（最多每小时一次）清理 90 天前记录，并按结束时间保留最多 20000 条；数据库不可用时回退为内存计数，不阻断传输
+- 展示：已结束卡片展示「大小 · 耗时 · 平均速度」与结束时间；排队中/进行中卡片展示已等待/已用时长，仅当存在未结束任务时启用 1 秒定时刷新，任务全部结束或页面销毁时取消；点击卡片打开任务详情（移动端底部弹层、桌面对话框），展示完整时间线、排队/总/传输耗时、平均速度、文件大小、尝试次数与失败原因
 
 #### Android 传输前台保活
 
